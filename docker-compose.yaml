@@ -2,7 +2,7 @@ version: "3.3"
 
 services:
   pet-store:
-    image: ghcr.io/nadundesilva/samples/pet-store:${IMAGE_TAG}
+    image: ghcr.io/nadundesilva/samples/pet-store/main:${IMAGE_TAG}
     build:
       context: .
       dockerfile: ./docker/pet_store/Dockerfile
@@ -12,6 +12,9 @@ services:
     - "8080:8080"
     depends_on:
     - database
+    environment:
+    - PET_STORE_PACKAGE=pet_store
+    - WAIT_FOR=tcp://database:33060
 
   database:
     image: mysql:8.0.27

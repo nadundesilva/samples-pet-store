@@ -13,5 +13,5 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-dockerize -wait tcp://database:33060
-uvicorn pet_store.main:app --host 0.0.0.0 --port 8080
+dockerize -wait ${WAIT_FOR}
+uvicorn ${PET_STORE_PACKAGE}.main:app --host 0.0.0.0 --port 8080

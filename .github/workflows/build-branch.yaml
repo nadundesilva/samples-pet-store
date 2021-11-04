@@ -43,7 +43,7 @@ jobs:
           sarif_file: ${{ steps.ossar.outputs.sarifFile }}
 
   build:
-    name: Build Branch
+    name: Build Sample
     runs-on: ubuntu-20.04
     permissions:
       packages: write
@@ -79,7 +79,13 @@ jobs:
       - name: Test Service Startup
         run: |
           docker-compose up -d
-          npx wait-on@5.3.0 -t 10000 -i 1000 --verbose tcp:localhost:8080
+
+          export DOCKERIZE_VERSION=v0.6.1
+          wget https://github.com/jwilder/dockerize/releases/download/${DOCKERIZE_VERSION}/dockerize-linux-amd64-${DOCKERIZE_VERSION}.tar.gz
+          tar -C /usr/local/bin -xzvf dockerize-linux-amd64-${DOCKERIZE_VERSION}.tar.gz
+          rm dockerize-linux-amd64-${DOCKERIZE_VERSION}.tar.gz
+          dockerize -wait http://localhost:8080/health -timeout 30s
+
           SERVER_OUTPUT=$(curl http://localhost:8080/health | jq -r .status)
           if [ ! "$SERVER_OUTPUT" == "Ready" ]; then
             exit 1
