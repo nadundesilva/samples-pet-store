@@ -1,2 +1,3 @@
-# sample-open-telemetry
-Sample application demonstrating how Open Telemetry works
+# Open Telemetry Sample
+
+A sample application demonstrating how Open Telemetry works.

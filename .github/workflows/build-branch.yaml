@@ -1,0 +1,25 @@
+name: Build Branch
+
+on: [push, pull_request]
+
+jobs:
+  build:
+    name: Build Branch
+    runs-on: ubuntu-20.04
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v2
+      - name: Setup Python
+        uses: actions/setup-python@v2
+      - name: Lint Code Base
+        uses: psf/black@stable
+        with:
+          args: ". --check"
+      - name: Run Tests
+        run: |
+          python3 -m pip install --upgrade coverage
+          coverage run --branch --source=./src/ setup.py test
+      - name: Upload Coverage Report
+        uses: codecov/codecov-action@v1
+        with:
+          fail_ci_if_error: true
