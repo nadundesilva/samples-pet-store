@@ -19,16 +19,16 @@ with open("README.md", "r", encoding="utf-8") as fh:
     long_description = fh.read()
 
 setuptools.setup(
-    name="open-telemetry-sample",
+    name="pet-store-sample",
     version="0.1.0",
     author="Nadun De Silva",
     author_email="nadunrds@gmail.com",
-    description="A sample application demonstrating how Open Telemetry works",
+    description="A sample Pet Store application",
     long_description=long_description,
     long_description_content_type="text/markdown",
-    url="https://github.com/nadundesilva/sample-open-telemetry",
+    url="https://github.com/nadundesilva/samples-pet-store",
     project_urls={
-        "Bug Tracker": "https://github.com/nadundesilva/sample-open-telemetry/issues",
+        "Bug Tracker": "https://github.com/nadundesilva/samples-pet-store/issues",
     },
     classifiers=[
         "Programming Language :: Python :: 3",

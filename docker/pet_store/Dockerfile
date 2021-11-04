@@ -12,10 +12,10 @@ FROM python:3.9.7
 WORKDIR /app
 EXPOSE 8080
 
-COPY --from=builder /app/dist/open_telemetry_sample-*.whl /app
+COPY --from=builder /app/dist/pet_store_sample-*.whl /app
 
-RUN pip install /app/open_telemetry_sample-*.whl && \
-    rm /app/open_telemetry_sample-*.whl && \
+RUN pip install /app/pet_store_sample-*.whl && \
+    rm /app/pet_store_sample-*.whl && \
     pip install --upgrade uvicorn==0.15.0
 
 ENTRYPOINT [ "uvicorn", "pet_store.main:app", "--host", "0.0.0.0", "--port", "8080" ]

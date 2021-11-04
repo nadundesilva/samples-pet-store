@@ -1,3 +1,3 @@
-# Open Telemetry Sample
+# Pet Store Sample
 
-A sample application demonstrating how Open Telemetry works.
+A sample Pet Store application.
