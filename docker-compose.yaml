@@ -12,6 +12,7 @@ services:
     - "8080:8080"
     depends_on:
     - database
+    - jaeger
     environment:
     - PET_STORE_PACKAGE=pet_store
     - WAIT_FOR=tcp://database:33060
@@ -27,3 +28,9 @@ services:
     - MYSQL_USER=pet-store-user
     - MYSQL_PASSWORD=pet-store-user-password
     - MYSQL_DATABASE=pet_store
+
+  jaeger:
+    image: jaegertracing/opentelemetry-all-in-one:latest
+    ports:
+    - "55680"
+    - "16686:16686"
