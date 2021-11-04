@@ -18,6 +18,8 @@ import setuptools
 with open("README.md", "r", encoding="utf-8") as fh:
     long_description = fh.read()
 
+OTL_VERSION = "1.6.2"
+
 setuptools.setup(
     name="pet-store-sample",
     version="0.1.0",
@@ -39,7 +41,13 @@ setuptools.setup(
     packages=setuptools.find_packages(where="src"),
     python_requires=">=3.6",
     setup_requires=["pytest-runner"],
-    install_requires=["fastapi ~= 0.70.0"],
+    install_requires=[
+        "fastapi ~= 0.70.0",
+        "opentelemetry-api ~= " + OTL_VERSION,
+        "opentelemetry-sdk ~= " + OTL_VERSION,
+        "opentelemetry-propagator-b3 ~= " + OTL_VERSION,
+        "opentelemetry-exporter-otlp ~= " + OTL_VERSION,
+    ],
     tests_require=["pytest ~= 6.2.3", "coverage ~= 5.5"],
     extras_require={"dev": ["black ~= 20.8b1"], "prod": ["uvicorn==0.15.0"]},
 )
