@@ -58,6 +58,19 @@ jobs:
         run: |
           python3 -m pip install --upgrade coverage
           coverage run --branch --source=./src/ setup.py test
+      - name: Test Sever Startup
+        run: |
+          python3 -m pip install --upgrade build .[prod]
+          python3 -m build
+          pip install ./dist/open_telemetry_sample-*.whl
+
+          uvicorn pet_store.main:app --host localhost --port 8000
+          # uvicorn pet_store.main:app --host localhost --port 8000 </dev/null &>/dev/null &
+          SERVER_PID=${!}
+          npx wait-on@5.3.0 -t 10000 -i 1000 --verbose http://localhost:8000
+
+          SERVER_OUTPUT=$(curl http://localhost:8000/health)
+          sudo kill -9 ${SERVER_PID}
       - name: Upload Coverage Report
         uses: codecov/codecov-action@v1
         with:

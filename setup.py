@@ -39,7 +39,7 @@ setuptools.setup(
     packages=setuptools.find_packages(where="src"),
     python_requires=">=3.6",
     setup_requires=["pytest-runner"],
-    install_requires=[],
+    install_requires=["fastapi ~= 0.70.0"],
     tests_require=["pytest ~= 6.2.3", "coverage ~= 5.5"],
-    extras_require={"dev": ["black ~= 20.8b1"]},
+    extras_require={"dev": ["black ~= 20.8b1"], "prod": ["uvicorn==0.15.0"]},
 )
