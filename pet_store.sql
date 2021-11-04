@@ -1,0 +1,8 @@
+DROP DATABASE IF EXISTS pet_store;
+CREATE DATABASE pet_store;
+
+USE pet_store;
+
+CREATE TABLE pets (
+    id INT(6) UNSIGNED AUTO_INCREMENT PRIMARY KEY
+);

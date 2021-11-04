@@ -10,3 +10,17 @@ services:
     - ALL
     ports:
     - "8080:8080"
+    depends_on:
+    - database
+
+  database:
+    image: mysql:8.0.27
+    ports:
+    - "33060"
+    volumes:
+    - ${PWD}/pet_store.sql:/docker-entrypoint-initdb.d/pet_store.sql
+    environment:
+    - MYSQL_ROOT_PASSWORD=pet-store-root
+    - MYSQL_USER=pet-store-user
+    - MYSQL_PASSWORD=pet-store-user-password
+    - MYSQL_DATABASE=pet_store
