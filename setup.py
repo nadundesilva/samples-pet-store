@@ -43,6 +43,7 @@ setuptools.setup(
     setup_requires=["pytest-runner"],
     install_requires=[
         "fastapi ~= 0.70.0",
+        "SQLAlchemy ~= 1.4.26",
         "opentelemetry-api ~= " + OTL_VERSION,
         "opentelemetry-sdk ~= " + OTL_VERSION,
         "opentelemetry-propagator-b3 ~= " + OTL_VERSION,

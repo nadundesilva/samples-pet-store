@@ -16,6 +16,7 @@ services:
     environment:
     - PET_STORE_PACKAGE=pet_store
     - WAIT_FOR=tcp://database:33060
+    - DATABASE_URL=mysql://pet-store-user:pet-store-user-password@database:33060/pet_store
 
   database:
     image: mysql:8.0.27

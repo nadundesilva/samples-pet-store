@@ -13,11 +13,18 @@ See the License for the specific language governing permissions and
 limitations under the License.
 """
 
-from fastapi import FastAPI
+import os
+from sqlalchemy import create_engine
+from sqlalchemy.ext.declarative import declarative_base
+from sqlalchemy.orm import sessionmaker
 
-app = FastAPI()
+DATABASE_URL = os.getenv("DATABASE_URL", "sqlite:///./sql_app.db")
 
+connect_args = {}
+if DATABASE_URL.startswith("sqlite"):
+    connect_args["check_same_thread"] = False
 
-@app.get("/health")
-def check_health():
-    return {"status": "Ready"}
+engine = create_engine(DATABASE_URL, connect_args=connect_args)
+SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
+
+Base = declarative_base()
