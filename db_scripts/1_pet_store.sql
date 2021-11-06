@@ -1,3 +1,17 @@
+-- Copyright (c) 2021, Deep Net. All Rights Reserved.
+--
+-- Licensed under the Apache License, Version 2.0 (the "License");
+-- you may not use this file except in compliance with the License.
+-- You may obtain a copy of the License at
+--
+--   http://www.apache.org/licenses/LICENSE-2.0
+--
+-- Unless required by applicable law or agreed to in writing, software
+-- distributed under the License is distributed on an "AS IS" BASIS,
+-- WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+-- See the License for the specific language governing permissions and
+-- limitations under the License.
+
 DROP DATABASE IF EXISTS pet_store;
 CREATE DATABASE pet_store;
 
@@ -6,6 +20,7 @@ USE pet_store;
 CREATE TABLE pets (
     id INT UNSIGNED AUTO_INCREMENT,
     display_name VARCHAR(255) NOT NULL,
+    kind VARCHAR(255) NOT NULL,
     current_price INT UNSIGNED NOT NULL,
     available_amount INT UNSIGNED NOT NULL DEFAULT 0,
 
@@ -15,6 +30,8 @@ CREATE TABLE pets (
 
 CREATE TABLE customers (
     id INT UNSIGNED AUTO_INCREMENT,
+    first_name VARCHAR(255) NOT NULL,
+    last_name VARCHAR(255) NOT NULL,
     delivery_address VARCHAR(255) NOT NULL,
     contact_number VARCHAR(255) NOT NULL,
 
@@ -24,11 +41,12 @@ CREATE TABLE customers (
 CREATE TABLE orders (
     id INT UNSIGNED AUTO_INCREMENT,
     customer_id INT UNSIGNED NOT NULL,
-    invoice_timestamp TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    payment_timestamp TIMESTAMP NOT NULL,
+    creation_timestamp TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    payment_timestamp TIMESTAMP,
 
     CONSTRAINT pk_id PRIMARY KEY (id),
     CONSTRAINT fk_customer_id FOREIGN KEY (customer_id) REFERENCES customers(id)
+    CHECK (payment_timestamp > creation_timestamp)
 );
 
 CREATE TABLE order_items (

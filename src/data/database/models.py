@@ -13,7 +13,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 """
 
-from sqlalchemy import Column, ForeignKey, Integer, String, Text
+from sqlalchemy import Column, ForeignKey, Integer, String, Text, Time
 from sqlalchemy.orm import relationship
 
 from . import Base
@@ -24,6 +24,7 @@ class Pet(Base):
 
     id = Column(Integer, primary_key=True, index=True)
     display_name = Column(String)
+    kind = Column(String)
     current_price = Column(Integer)
     available_amount = Column(Integer)
 
@@ -32,6 +33,8 @@ class Customer(Base):
     __tablename__ = "customers"
 
     id = Column(Integer, primary_key=True, index=True)
+    first_name = Column(String)
+    last_name = Column(String)
     delivery_address = Column(Text)
     contact_number = Column(String)
 
@@ -56,6 +59,7 @@ class Order(Base):
 
     id = Column(Integer, primary_key=True, index=True)
     customer_id = Column(Integer, ForeignKey("customers.id"))
+    payment_timestamp = Column(Time)
 
     items = relationship("OrderItem", back_populates="order")
     customer = relationship("Customer", back_populates="orders")

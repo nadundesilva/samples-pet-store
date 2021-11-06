@@ -20,5 +20,6 @@ from pydantic import BaseModel
 class Pet(BaseModel):
     id: Optional[int]
     display_name: str
+    kind: str
     current_price: int
     available_amount: Optional[int]
