@@ -14,15 +14,15 @@ limitations under the License.
 """
 
 import logging
-import os
 from urllib import parse
 from http.client import HTTPConnection
 from fastapi import Depends, FastAPI, Query, Response, status
 from fastapi.openapi.utils import get_openapi
-from typing import Any, List, Type
+from typing import Dict, List, Literal, TypedDict, Union
 from fastapi import FastAPI
 from data import schemas
 from data import convert
+from apis import connections, client as api_client
 
 logger = logging.getLogger(__name__)
 
@@ -46,42 +46,30 @@ def __get_open_api_schema():
 app.openapi = __get_open_api_schema
 
 
-def __get_pets_api_connection():
-    connection = HTTPConnection(
-        os.getenv("PETS_API_HOST"), int(os.getenv("PETS_API_PORT")), timeout=10
-    )
-    try:
-        yield connection
-    finally:
-        connection.close()
-
-
-def __parse_client_response(
-    connection: HTTPConnection, incoming_req_response: Response, object_type: Type[Any]
-):
-    client_response = connection.getresponse()
-    incoming_req_response.status_code = client_response.status
-    if client_response.status == status.HTTP_200_OK:
-        return convert.from_json(client_response.read(), object_type)
-    return None
+class HealthStatus(TypedDict):
+    status: Union[Literal["Ready"], Literal["Unavailable"]]
+    dependencies: Dict[str, "HealthStatus"]
 
 
 @app.get("/health")
 def check_health(
     response: Response,
-    pets_api_connection: HTTPConnection = Depends(__get_pets_api_connection),
-):
+    pets_api_connection: HTTPConnection = Depends(connections.pets_api),
+) -> HealthStatus:
     dependency_connections = {"pets-api": pets_api_connection}
 
     api_status = "Ready"
-    dependency_health = {}
+    dependency_health: Dict[str, HealthStatus] = {}
     for api_name, connection in dependency_connections.items():
-        connection.request("GET", "/health")
-        dependency_health[api_name] = __parse_client_response(
-            connection, response, None
-        )
+        dependency_status, status_code = api_client.call(connection, "GET", "/health")
         if api_status == "Ready":
-            api_status = dependency_health[api_name]["status"]
+            api_status = "Unavailable"
+            response.status_code = 503
+
+        if status_code == 200:
+            dependency_health[api_name] = dependency_status
+        else:
+            dependency_health[api_name] = {"status": "Ready"}
 
     return {"status": "Ready", "dependencies": dependency_health}
 
@@ -91,16 +79,17 @@ def get_pets_catalog(
     response: Response,
     limit: int = Query(default=100, lte=100),
     offset: int = 0,
-    pets_api_connection: HTTPConnection = Depends(__get_pets_api_connection),
+    pets_api_connection: HTTPConnection = Depends(connections.pets_api),
 ) -> List[schemas.Pet]:
-    pets_api_connection.request(
+    pets, response.status_code = api_client.call(
+        pets_api_connection,
         "GET",
         "/catalog?limit="
         + parse.quote(str(limit))
         + "&offset="
         + parse.quote(str(offset)),
+        object_type=schemas.Pet,
     )
-    pets = __parse_client_response(pets_api_connection, response, schemas.Pet)
     logger.debug("Found " + str(len(pets)) + " available pets")
     return pets
 
@@ -109,11 +98,12 @@ def get_pets_catalog(
 def add_pet(
     response: Response,
     pet: schemas.Pet,
-    pets_api_connection: HTTPConnection = Depends(__get_pets_api_connection),
+    pets_api_connection: HTTPConnection = Depends(connections.pets_api),
 ) -> schemas.Pet:
     body = bytes(convert.to_json(pet), "utf-8")
-    pets_api_connection.request("POST", "/", body=body)
-    created_pet = __parse_client_response(pets_api_connection, response, schemas.Pet)
+    created_pet, response.status_code = api_client.call(
+        pets_api_connection, "POST", "/", body=body, object_type=schemas.Pet
+    )
     logger.debug(
         "Created pet "
         + str(created_pet.display_name)

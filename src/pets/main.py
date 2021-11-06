@@ -16,20 +16,12 @@ limitations under the License.
 from typing import List
 from fastapi import Depends, FastAPI, Query, status
 from sqlalchemy.orm import Session
-from data.database import create_session
+from data.database import db_session
 from data import schemas
 from . import crud
 
 
 app = FastAPI(root_path="/pets")
-
-
-def get_db():
-    db = create_session()
-    try:
-        yield db
-    finally:
-        db.close()
 
 
 @app.get("/health", status_code=status.HTTP_200_OK)
@@ -41,12 +33,12 @@ def check_health():
 def get_pets_catalog(
     limit: int = Query(default=100, lte=100),
     offset: int = 0,
-    db: Session = Depends(get_db),
+    db: Session = Depends(db_session),
 ) -> List[schemas.Pet]:
     ret = crud.get_available_pets(db, limit, offset)
     return ret
 
 
 @app.post("/", response_model=schemas.Pet, status_code=status.HTTP_200_OK)
-def add_pet(pet: schemas.Pet, db: Session = Depends(get_db)) -> schemas.Pet:
+def add_pet(pet: schemas.Pet, db: Session = Depends(db_session)) -> schemas.Pet:
     return crud.create_pet(db, pet=pet)

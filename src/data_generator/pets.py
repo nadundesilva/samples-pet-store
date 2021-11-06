@@ -15,7 +15,7 @@ limitations under the License.
 
 import logging
 from typing import List
-from .pet_store_api import call_api
+from .pet_store_api import call as call_api
 from data import schemas
 
 

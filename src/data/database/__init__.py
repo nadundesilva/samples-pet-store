@@ -31,5 +31,9 @@ Base = declarative_base()
 Base.metadata.create_all(bind=__engine)
 
 
-def create_session():
-    return __SessionLocal()
+def db_session():
+    db = __SessionLocal()
+    try:
+        yield db
+    finally:
+        db.close()

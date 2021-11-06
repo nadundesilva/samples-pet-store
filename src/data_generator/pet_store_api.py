@@ -12,27 +12,20 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 """
-import os
-from http.client import HTTPConnection
+
 from typing import Any, Type
 from data import convert
+from apis import connections, client as api_client
 
 
-def call_api(method: str, url: str, object_type: Type[Any], body: Any = None):
-    connection = HTTPConnection(
-        os.getenv("PET_STORE_API_HOST"),
-        int(os.getenv("PET_STORE_API_PORT")),
-        timeout=10,
+def call(method: str, url: str, object_type: Type[Any], body: Any = None) -> Any:
+    connection = next(connections.pet_store_api())
+    body_bytes = bytes(convert.to_json(body), "utf-8") if body is not None else None
+    response_body, status_code = api_client.call(
+        connection, method, url, body=body_bytes, object_type=object_type
     )
-    try:
-        body_bytes = bytes(convert.to_json(body), "utf-8") if body is not None else None
-        connection.request(method, url, body=body_bytes)
-        response = connection.getresponse()
-        if response.status != 200:
-            raise Exception(
-                "Failed to call Pet Store API with status code " + str(response.status)
-            )
-
-        return convert.from_json(response.read(), object_type)
-    finally:
-        connection.close()
+    if status_code != 200:
+        raise Exception(
+            "Failed to call Pet Store API with status code " + str(status_code)
+        )
+    return response_body
