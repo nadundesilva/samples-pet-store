@@ -67,8 +67,23 @@ def __parse_client_response(
 
 
 @app.get("/health")
-def check_health():
-    return {"status": "Ready"}
+def check_health(
+    response: Response,
+    pets_api_connection: HTTPConnection = Depends(__get_pets_api_connection),
+):
+    dependency_connections = {"pets-api": pets_api_connection}
+
+    api_status = "Ready"
+    dependency_health = {}
+    for api_name, connection in dependency_connections.items():
+        connection.request("GET", "/health")
+        dependency_health[api_name] = __parse_client_response(
+            connection, response, None
+        )
+        if api_status == "Ready":
+            api_status = dependency_health[api_name]["status"]
+
+    return {"status": "Ready", "dependencies": dependency_health}
 
 
 @app.get("/catalog", response_model=List[schemas.Pet], status_code=status.HTTP_200_OK)

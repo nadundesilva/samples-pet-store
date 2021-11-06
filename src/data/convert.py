@@ -22,4 +22,7 @@ def to_json(payload: Any) -> str:
 
 
 def from_json(payload: str, object_type: Optional[Any]) -> Any:
-    return json.loads(payload, object_hook=lambda d: object_type(**d))
+    return json.loads(
+        payload,
+        object_hook=lambda d: object_type(**d) if object_type is not None else d,
+    )
