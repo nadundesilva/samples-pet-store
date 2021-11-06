@@ -12,3 +12,9 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 """
+
+import logging
+import os
+
+LOG_LEVEL = os.environ.get("LOG_LEVEL", "DEBUG").upper()
+logging.basicConfig(level=LOG_LEVEL)
