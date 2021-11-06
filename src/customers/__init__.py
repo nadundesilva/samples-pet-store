@@ -13,21 +13,8 @@ See the License for the specific language governing permissions and
 limitations under the License.
 """
 
-from typing import Optional
-from pydantic import BaseModel
+import logging
+import os
 
-
-class Pet(BaseModel):
-    id: Optional[int]
-    display_name: str
-    kind: str
-    current_price: int
-    available_amount: Optional[int]
-
-
-class Customer(BaseModel):
-    id: Optional[int]
-    first_name: str
-    last_name: str
-    delivery_address: str
-    contact_number: str
+LOG_LEVEL = os.environ.get("LOG_LEVEL", "DEBUG").upper()
+logging.basicConfig(level=LOG_LEVEL)

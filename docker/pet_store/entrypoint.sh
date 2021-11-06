@@ -15,5 +15,10 @@
 
 set -eo pipefail
 
-dockerize -wait ${WAIT_FOR} --timeout 1m
+IFS=',' read -r -a dependencies <<< "${WAIT_FOR}"
+for dependency in "${dependencies[@]}"
+do
+   dockerize -wait "${dependency}" --timeout 1m
+done
+
 uvicorn ${PET_STORE_PACKAGE}.main:app --host 0.0.0.0 --port 8080

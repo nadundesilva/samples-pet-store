@@ -26,13 +26,16 @@ services:
     - "8080:8080"
     depends_on:
     - pets-api
+    - customers-api
     - jaeger
     environment:
     - PET_STORE_PACKAGE=pet_store
-    - WAIT_FOR=tcp://pets-api:8080
+    - WAIT_FOR=tcp://pets-api:8080,tcp://customers-api:8080
     - LOG_LEVEL=DEBUG
     - PETS_API_HOST=pets-api
     - PETS_API_PORT=8080
+    - CUSTOMERS_API_HOST=customers-api
+    - CUSTOMERS_API_PORT=8080
 
   pets-api:
     image: ghcr.io/nadundesilva/samples/pet-store/main:${VERSION}
@@ -42,12 +45,30 @@ services:
     cap_drop:
     - ALL
     ports:
-    - "8090:8080"
+    - "8080"
     depends_on:
     - database
     - jaeger
     environment:
     - PET_STORE_PACKAGE=pets
+    - WAIT_FOR=tcp://database:3306
+    - LOG_LEVEL=DEBUG
+    - DATABASE_URL=mysql+pymysql://pet-store-user:pet-store-user-password@database:3306/pet_store
+
+  customers-api:
+    image: ghcr.io/nadundesilva/samples/pet-store/main:${VERSION}
+    build:
+      context: .
+      dockerfile: ./docker/pet_store/Dockerfile
+    cap_drop:
+    - ALL
+    ports:
+    - "8080"
+    depends_on:
+    - database
+    - jaeger
+    environment:
+    - PET_STORE_PACKAGE=customers
     - WAIT_FOR=tcp://database:3306
     - LOG_LEVEL=DEBUG
     - DATABASE_URL=mysql+pymysql://pet-store-user:pet-store-user-password@database:3306/pet_store

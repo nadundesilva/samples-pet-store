@@ -36,3 +36,7 @@ def pet_store_api() -> Generator[HTTPConnection, None, None]:
 
 def pets_api() -> Generator[HTTPConnection, None, None]:
     yield from __get_connection("PETS")
+
+
+def customers_api() -> Generator[HTTPConnection, None, None]:
+    yield from __get_connection("CUSTOMERS")

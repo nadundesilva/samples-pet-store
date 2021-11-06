@@ -26,6 +26,11 @@ def call(method: str, url: str, object_type: Type[Any], body: Any = None) -> Any
     )
     if status_code != 200:
         raise Exception(
-            "Failed to call Pet Store API with status code " + str(status_code)
+            "Failed to call Pet Store API with status code "
+            + str(status_code)
+            + " for "
+            + method
+            + " "
+            + url
         )
     return response_body

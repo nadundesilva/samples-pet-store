@@ -18,30 +18,15 @@ from typing import List
 from .pet_store_api import call as call_api
 from data import schemas
 
-
 logger = logging.getLogger(__name__)
 
 
-def __get_all_pets() -> bool:
-    return call_api("GET", "/catalog", schemas.Pet)
-
-
 def __create_pet(pet: schemas.Pet) -> schemas.Pet:
-    return call_api("POST", "/", schemas.Pet, pet)
+    return call_api("POST", "/catalog", schemas.Pet, pet)
 
 
 def generate() -> List[schemas.Pet]:
-    db_pets = __get_all_pets()
-    if len(db_pets) > 0:
-        logger.warning(
-            "Pet data not genreated as "
-            + str(len(db_pets))
-            + " pet(s) is already present in DB"
-        )
-        return db_pets
-
-    pets = []
-    pets.append(
+    pets = [
         __create_pet(
             schemas.Pet(
                 display_name="Labrador Retriever",
@@ -49,9 +34,7 @@ def generate() -> List[schemas.Pet]:
                 current_price=1000,
                 available_amount=3,
             )
-        )
-    )
-    pets.append(
+        ),
         __create_pet(
             schemas.Pet(
                 display_name="Golden Retriever",
@@ -59,9 +42,7 @@ def generate() -> List[schemas.Pet]:
                 current_price=1500,
                 available_amount=7,
             )
-        )
-    )
-    pets.append(
+        ),
         __create_pet(
             schemas.Pet(
                 display_name="German Shepherd",
@@ -69,9 +50,7 @@ def generate() -> List[schemas.Pet]:
                 current_price=1400,
                 available_amount=5,
             )
-        )
-    )
-    pets.append(
+        ),
         __create_pet(
             schemas.Pet(
                 display_name="Pembroke Welsh Corgi",
@@ -79,9 +58,7 @@ def generate() -> List[schemas.Pet]:
                 current_price=1600,
                 available_amount=3,
             )
-        )
-    )
-    pets.append(
+        ),
         __create_pet(
             schemas.Pet(
                 display_name="Savannah",
@@ -89,9 +66,7 @@ def generate() -> List[schemas.Pet]:
                 current_price=15000,
                 available_amount=2,
             )
-        )
-    )
-    pets.append(
+        ),
         __create_pet(
             schemas.Pet(
                 display_name="Bengal",
@@ -99,9 +74,7 @@ def generate() -> List[schemas.Pet]:
                 current_price=1300,
                 available_amount=4,
             )
-        )
-    )
-    pets.append(
+        ),
         __create_pet(
             schemas.Pet(
                 display_name="Common Goldfish",
@@ -109,9 +82,7 @@ def generate() -> List[schemas.Pet]:
                 current_price=30,
                 available_amount=50,
             )
-        )
-    )
-    pets.append(
+        ),
         __create_pet(
             schemas.Pet(
                 display_name="Corydoras Catfish",
@@ -119,9 +90,7 @@ def generate() -> List[schemas.Pet]:
                 current_price=25,
                 available_amount=20,
             )
-        )
-    )
-    pets.append(
+        ),
         __create_pet(
             schemas.Pet(
                 display_name="Syrian Hamster",
@@ -129,11 +98,7 @@ def generate() -> List[schemas.Pet]:
                 current_price=13,
                 available_amount=10,
             )
-        )
-    )
-
-    db_pets = __get_all_pets()
-    if len(db_pets) != len(pets):
-        raise Exception("Data inconsistency in generated pets")
-    logger.info("Generated pets sample data completed")
+        ),
+    ]
+    logger.info("Generated " + str(len(pets)) + " sample pet(s) completed")
     return pets

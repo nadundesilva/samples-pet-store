@@ -15,7 +15,6 @@ limitations under the License.
 
 from sqlalchemy import Column, ForeignKey, Integer, String, Text, Time
 from sqlalchemy.orm import relationship
-
 from . import Base
 
 

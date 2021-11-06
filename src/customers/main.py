@@ -13,14 +13,13 @@ See the License for the specific language governing permissions and
 limitations under the License.
 """
 
-from typing import List
-from fastapi import Depends, FastAPI, Query, status
+from fastapi import Depends, FastAPI, status
 from sqlalchemy.orm import Session
 from data.database import db_session
 from data import schemas
 from . import crud
 
-app = FastAPI(root_path="/pets")
+app = FastAPI(root_path="/customers")
 
 
 @app.get("/health", status_code=status.HTTP_200_OK)
@@ -28,18 +27,15 @@ def check_health():
     return {"status": "Ready"}
 
 
-@app.get("/", response_model=List[schemas.Pet], status_code=status.HTTP_200_OK)
-def get_pets_catalog(
-    limit: int = Query(default=100, lte=100),
-    offset: int = 0,
-    db: Session = Depends(db_session),
-) -> List[schemas.Pet]:
-    ret = crud.get_available_pets(db, limit, offset)
-    return ret
-
-
-@app.post("/", response_model=schemas.Pet, status_code=status.HTTP_200_OK)
-def add_pet(pet: schemas.Pet, db: Session = Depends(db_session)) -> schemas.Pet:
-    if pet.id is not None:
-        raise Exception("ID for new pets should not be specified")
-    return crud.create_pet(db, pet=pet)
+@app.post("/", response_model=schemas.Customer, status_code=status.HTTP_200_OK)
+def add_pet(
+    customer: schemas.Customer, db: Session = Depends(db_session)
+) -> schemas.Customer:
+    if customer.id is not None:
+        raise Exception("ID for new customers should not be specified")
+    if len(customer.contact_number) != 12:
+        raise Exception(
+            "Invalid length of contact number of customer; expected 12, but received "
+            + str(len(customer.contact_number))
+        )
+    return crud.create_customer(db, customer=customer)

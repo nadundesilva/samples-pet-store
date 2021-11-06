@@ -13,31 +13,19 @@ See the License for the specific language governing permissions and
 limitations under the License.
 """
 
-from typing import List
 from sqlalchemy.orm import Session
 from data.database import models
 from data import schemas
 
 
-def get_available_pets(db: Session, limit: int, offset: int) -> List[schemas.Pet]:
-    db_pets = (
-        db.query(models.Pet)
-        .filter(models.Pet.available_amount > 0)
-        .limit(limit)
-        .offset(offset)
-        .all()
+def create_customer(db: Session, customer: schemas.Customer) -> schemas.Customer:
+    db_customer = models.Customer(
+        first_name=customer.first_name,
+        last_name=customer.last_name,
+        delivery_address=customer.delivery_address,
+        contact_number=customer.contact_number,
     )
-    return [schemas.Pet(**db_pet.__dict__) for db_pet in db_pets]
-
-
-def create_pet(db: Session, pet: schemas.Pet) -> schemas.Pet:
-    db_pet = models.Pet(
-        display_name=pet.display_name,
-        kind=pet.kind,
-        current_price=pet.current_price,
-        available_amount=pet.available_amount,
-    )
-    db.add(db_pet)
+    db.add(db_customer)
     db.commit()
-    db.refresh(db_pet)
-    return schemas.Pet(**db_pet.__dict__)
+    db.refresh(db_customer)
+    return schemas.Customer(**db_customer.__dict__)

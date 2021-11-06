@@ -14,8 +14,7 @@ limitations under the License.
 """
 
 import logging
-from . import pets
-
+from . import pets, customers
 
 logger = logging.getLogger(__name__)
 
@@ -23,4 +22,5 @@ logger = logging.getLogger(__name__)
 def generate_data() -> None:
     logger.info("Generating sample data started")
     pets.generate()
+    customers.generate()
     logger.info("Generating sample data completed")

@@ -36,7 +36,7 @@ def call(
     else:
         logger.error(
             "API call failed with status code "
-            + response.status
+            + str(response.status)
             + " and response body "
             + str(response.read())
         )

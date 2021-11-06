@@ -84,30 +84,65 @@ def get_pets_catalog(
     pets, response.status_code = api_client.call(
         pets_api_connection,
         "GET",
-        "/catalog?limit="
-        + parse.quote(str(limit))
-        + "&offset="
-        + parse.quote(str(offset)),
+        "/?limit=" + parse.quote(str(limit)) + "&offset=" + parse.quote(str(offset)),
         object_type=schemas.Pet,
     )
     logger.debug("Found " + str(len(pets)) + " available pets")
     return pets
 
 
-@app.post("/", response_model=schemas.Pet, status_code=status.HTTP_200_OK)
+@app.post("/catalog", response_model=schemas.Pet, status_code=status.HTTP_200_OK)
 def add_pet(
     response: Response,
     pet: schemas.Pet,
     pets_api_connection: HTTPConnection = Depends(connections.pets_api),
 ) -> schemas.Pet:
     body = bytes(convert.to_json(pet), "utf-8")
-    created_pet, response.status_code = api_client.call(
+    created_pet, status_code = api_client.call(
         pets_api_connection, "POST", "/", body=body, object_type=schemas.Pet
     )
-    logger.debug(
-        "Created pet "
-        + str(created_pet.display_name)
-        + " of kind "
-        + str(created_pet.kind)
-    )
+    response.status_code = status_code
+    if status_code == 200:
+        logger.debug(
+            "Created a new pet "
+            + created_pet.display_name
+            + " of kind "
+            + created_pet.kind
+            + " with ID "
+            + str(created_pet.id)
+        )
+    else:
+        logger.error(
+            "Failed to create a new pet "
+            + pet.display_name
+            + " of kind "
+            + pet.kind
+            + " with status code "
+            + str(status_code)
+        )
     return created_pet
+
+
+@app.post("/customers", response_model=schemas.Customer, status_code=status.HTTP_200_OK)
+def add_customer(
+    response: Response,
+    customer: schemas.Customer,
+    customers_api_connection: HTTPConnection = Depends(connections.customers_api),
+) -> schemas.Customer:
+    body = bytes(convert.to_json(customer), "utf-8")
+    created_customer, status_code = api_client.call(
+        customers_api_connection,
+        "POST",
+        "/",
+        body=body,
+        object_type=schemas.Customer,
+    )
+    response.status_code = status_code
+    if status_code == 200:
+        logger.debug("Created a new customer with ID " + str(created_customer.id))
+    else:
+        logger.error(
+            "Failed to create a new customer with status code " + str(status_code)
+        )
+
+    return created_customer
