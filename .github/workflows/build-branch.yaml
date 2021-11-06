@@ -98,7 +98,7 @@ jobs:
           sudo apt install docker-compose
           docker-compose build
         env:
-          IMAGE_TAG: latest
+          VERSION: latest
       - name: Test Service Startup
         run: |
           docker-compose up -d
@@ -107,16 +107,16 @@ jobs:
           wget https://github.com/jwilder/dockerize/releases/download/${DOCKERIZE_VERSION}/dockerize-linux-amd64-${DOCKERIZE_VERSION}.tar.gz
           tar -C /usr/local/bin -xzvf dockerize-linux-amd64-${DOCKERIZE_VERSION}.tar.gz
           rm dockerize-linux-amd64-${DOCKERIZE_VERSION}.tar.gz
-          dockerize -wait http://localhost:8080/health -timeout 30s
+          dockerize -wait http://localhost:8080/health -timeout 5m
 
           SERVER_OUTPUT=$(curl http://localhost:8080/health | jq -r .status)
           if [ ! "$SERVER_OUTPUT" == "Ready" ]; then
             exit 1
           fi
         env:
-          IMAGE_TAG: latest
+          VERSION: latest
       - name: Push Docker Image
         run: |
           docker-compose push
         env:
-          IMAGE_TAG: latest
+          VERSION: latest
