@@ -13,4 +13,4 @@ A sample Pet Store application.
    ```bash
    VERSION=latest docker-compose up
    ```
-2. Go to http://localhost:8080/docs to view the OAS spec for the API and invoke.
+2. Go to http://localhost:8080/docs to view the OAS spec for the API and invoke using the available UI.
