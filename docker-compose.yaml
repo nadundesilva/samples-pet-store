@@ -1,6 +1,19 @@
 version: "3.3"
 
 services:
+  data-generator:
+    image: ghcr.io/nadundesilva/samples/pet-store/data-generator:${VERSION}
+    build:
+      context: .
+      dockerfile: ./docker/data_generator/Dockerfile
+    cap_drop:
+    - ALL
+    depends_on:
+    - pet-store-api
+    environment:
+    - PET_STORE_API_HOST=pet-store-api
+    - PET_STORE_API_PORT=8080
+
   pet-store-api:
     image: ghcr.io/nadundesilva/samples/pet-store/main:${VERSION}
     build:
@@ -15,7 +28,7 @@ services:
     - jaeger
     environment:
     - PET_STORE_PACKAGE=pet_store
-    - WAIT_FOR=tcp://pet-api:8080
+    - WAIT_FOR=tcp://pets-api:8080
     - PETS_API_HOST=pets-api
     - PETS_API_PORT=8080
 
@@ -41,7 +54,7 @@ services:
     ports:
     - "3306"
     volumes:
-    - ${PWD}/db_scripts:/docker-entrypoint-initdb.d
+    - ${PWD}/db_scripts/1_pet_store.sql:/docker-entrypoint-initdb.d/1_pet_store.sql
     environment:
     - MYSQL_ROOT_PASSWORD=pet-store-root
     - MYSQL_USER=pet-store-user

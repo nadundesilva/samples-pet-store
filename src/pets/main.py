@@ -44,11 +44,11 @@ def get_pets_catalog(
     limit: int = Query(default=100, lte=100),
     offset: int = 0,
     db: Session = Depends(get_db),
-) -> List[models.Pet]:
+) -> List[schemas.Pet]:
     ret = crud.get_available_pets(db, limit, offset)
     return ret
 
 
 @app.post("/", response_model=schemas.Pet, status_code=status.HTTP_200_OK)
-def add_pet(pet: schemas.Pet, db: Session = Depends(get_db)) -> models.Pet:
+def add_pet(pet: schemas.Pet, db: Session = Depends(get_db)) -> schemas.Pet:
     return crud.create_pet(db, pet=pet)

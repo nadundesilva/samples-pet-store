@@ -15,5 +15,5 @@
 
 set -eo pipefail
 
-dockerize -wait ${WAIT_FOR} --timeout 1m
-uvicorn ${PET_STORE_PACKAGE}.main:app --host 0.0.0.0 --port 8080
+dockerize -wait tcp://${PET_STORE_API_HOST}:${PET_STORE_API_PORT} --timeout 1m
+python -c 'from data_generator.main import generate_data; generate_data();'

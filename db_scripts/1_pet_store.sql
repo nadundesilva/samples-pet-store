@@ -46,7 +46,6 @@ CREATE TABLE orders (
 
     CONSTRAINT pk_id PRIMARY KEY (id),
     CONSTRAINT fk_customer_id FOREIGN KEY (customer_id) REFERENCES customers(id)
-    CHECK (payment_timestamp > creation_timestamp)
 );
 
 CREATE TABLE order_items (

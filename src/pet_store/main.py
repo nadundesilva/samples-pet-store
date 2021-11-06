@@ -91,5 +91,6 @@ def add_pet(
     pet: schemas.Pet,
     pets_api_connection: HTTPConnection = Depends(get_pets_api_connection),
 ) -> schemas.Pet:
-    pets_api_connection.request("POST", "/", body=pet)
+    body = bytes(json.dumps(dict(pet)), "utf-8")
+    pets_api_connection.request("POST", "/", body=body)
     return parse_client_response(pets_api_connection, response, schemas.Pet)

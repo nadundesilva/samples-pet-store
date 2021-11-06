@@ -20,23 +20,25 @@ from data.database import models
 from data import schemas
 
 
-def get_available_pets(db: Session, limit: int, offset: int) -> List[models.Pet]:
-    return (
+def get_available_pets(db: Session, limit: int, offset: int) -> List[schemas.Pet]:
+    db_pets = (
         db.query(models.Pet)
         .filter(models.Pet.available_amount > 0)
         .limit(limit)
         .offset(offset)
         .all()
     )
+    return [schemas.Pet(**db_pet.__dict__) for db_pet in db_pets]
 
 
-def create_pet(db: Session, pet: schemas.Pet) -> models.Pet:
+def create_pet(db: Session, pet: schemas.Pet) -> schemas.Pet:
     db_pet = models.Pet(
         display_name=pet.display_name,
+        kind=pet.kind,
         current_price=pet.current_price,
         available_amount=pet.available_amount,
     )
     db.add(db_pet)
     db.commit()
     db.refresh(db_pet)
-    return db_pet
+    return schemas.Pet(**db_pet.__dict__)
