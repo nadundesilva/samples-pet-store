@@ -18,11 +18,29 @@ import os
 from urllib import parse
 from http.client import HTTPConnection
 from fastapi import Depends, FastAPI, Query, Response, status
+from fastapi.openapi.utils import get_openapi
 from typing import Any, List, Type
 from fastapi import FastAPI
 from database import schemas
 
 app = FastAPI()
+
+
+def get_open_api_schema():
+    if app.openapi_schema:
+        return app.openapi_schema
+
+    openapi_schema = get_openapi(
+        title="Pet Store API",
+        version="1.0.0",
+        description="Pet Store Sample API",
+        routes=app.routes,
+    )
+    app.openapi_schema = openapi_schema
+    return app.openapi_schema
+
+
+app.openapi = get_open_api_schema
 
 
 def get_pets_api_connection():
@@ -67,7 +85,7 @@ def get_pets_catalog(
     return parse_client_response(pets_api_connection, response, List[schemas.Pet])
 
 
-@app.post("/", response_model=schemas.Pet)
+@app.post("/", response_model=schemas.Pet, status_code=status.HTTP_200_OK)
 def add_pet(
     response: Response,
     pet: schemas.Pet,

@@ -14,7 +14,7 @@ limitations under the License.
 """
 
 from typing import List
-from fastapi import Depends, FastAPI, Query
+from fastapi import Depends, FastAPI, Query, status
 from sqlalchemy.orm import Session
 from database import engine, models, schemas, SessionLocal
 from . import crud
@@ -33,12 +33,12 @@ def get_db():
         db.close()
 
 
-@app.get("/health")
+@app.get("/health", status_code=status.HTTP_200_OK)
 def check_health():
     return {"status": "Ready"}
 
 
-@app.get("/catalog", response_model=List[schemas.Pet])
+@app.get("/catalog", response_model=List[schemas.Pet], status_code=status.HTTP_200_OK)
 def get_pets_catalog(
     limit: int = Query(default=100, lte=100),
     offset: int = 0,
@@ -48,6 +48,6 @@ def get_pets_catalog(
     return ret
 
 
-@app.post("/", response_model=schemas.Pet)
+@app.post("/", response_model=schemas.Pet, status_code=status.HTTP_200_OK)
 def add_pet(pet: schemas.Pet, db: Session = Depends(get_db)) -> models.Pet:
     return crud.create_pet(db, pet=pet)

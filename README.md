@@ -13,3 +13,4 @@ A sample Pet Store application.
    ```bash
    IMAGE_TAG=latest docker-compose up
    ```
+2. Go to http://localhost:8080/docs to view the OAS spec for the API and invoke.
