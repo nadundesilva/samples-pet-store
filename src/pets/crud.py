@@ -16,7 +16,8 @@ limitations under the License.
 from typing import List
 from sqlalchemy.orm import Session
 
-from database import models, schemas
+from data.database import models
+from data import schemas
 
 
 def get_available_pets(db: Session, limit: int, offset: int) -> List[models.Pet]:

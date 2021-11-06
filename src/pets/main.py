@@ -16,7 +16,8 @@ limitations under the License.
 from typing import List
 from fastapi import Depends, FastAPI, Query, status
 from sqlalchemy.orm import Session
-from database import engine, models, schemas, SessionLocal
+from data.database import engine, models, SessionLocal
+from data import schemas
 from . import crud
 
 models.Base.metadata.create_all(bind=engine)

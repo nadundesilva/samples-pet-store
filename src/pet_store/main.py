@@ -21,7 +21,7 @@ from fastapi import Depends, FastAPI, Query, Response, status
 from fastapi.openapi.utils import get_openapi
 from typing import Any, List, Type
 from fastapi import FastAPI
-from database import schemas
+from data import schemas
 
 app = FastAPI()
 
