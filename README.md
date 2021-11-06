@@ -4,6 +4,7 @@ A sample Pet Store application.
 
 ## Requirements
 
+* Docker
 * Docker Compose
 
 ## Starting Up

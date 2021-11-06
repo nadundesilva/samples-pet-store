@@ -44,6 +44,8 @@ setuptools.setup(
     install_requires=[
         "fastapi ~= 0.70.0",
         "SQLAlchemy ~= 1.4.26",
+        "PyMySQL ~= 1.0.2",
+        "cryptography ~= 35.0.0",
         "opentelemetry-api ~= " + OTL_VERSION,
         "opentelemetry-sdk ~= " + OTL_VERSION,
         "opentelemetry-propagator-b3 ~= " + OTL_VERSION,

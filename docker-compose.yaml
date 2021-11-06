@@ -2,7 +2,7 @@ version: "3.3"
 
 services:
   pet-store:
-    image: ghcr.io/nadundesilva/samples/pet-store/main:${IMAGE_TAG}
+    image: ghcr.io/nadundesilva/samples/pet-store/main:${VERSION}
     build:
       context: .
       dockerfile: ./docker/pet_store/Dockerfile
@@ -11,17 +11,35 @@ services:
     ports:
     - "8080:8080"
     depends_on:
-    - database
+    - pets-api
     - jaeger
     environment:
     - PET_STORE_PACKAGE=pet_store
-    - WAIT_FOR=tcp://database:33060
-    - DATABASE_URL=mysql://pet-store-user:pet-store-user-password@database:33060/pet_store
+    - WAIT_FOR=tcp://pet-api:8080
+    - PETS_API_HOST=pets-api
+    - PETS_API_PORT=8080
+
+  pets-api:
+    image: ghcr.io/nadundesilva/samples/pet-store/main:${VERSION}
+    build:
+      context: .
+      dockerfile: ./docker/pet_store/Dockerfile
+    cap_drop:
+    - ALL
+    ports:
+    - "8090:8080"
+    depends_on:
+    - database
+    - jaeger
+    environment:
+    - PET_STORE_PACKAGE=pets
+    - WAIT_FOR=tcp://database:3306
+    - DATABASE_URL=mysql+pymysql://pet-store-user:pet-store-user-password@database:3306/pet_store
 
   database:
     image: mysql:8.0.27
     ports:
-    - "33060"
+    - "3306"
     volumes:
     - ${PWD}/pet_store.sql:/docker-entrypoint-initdb.d/pet_store.sql
     environment:

@@ -13,5 +13,5 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-dockerize -wait ${WAIT_FOR}
+dockerize -wait ${WAIT_FOR} --timeout 60s
 uvicorn ${PET_STORE_PACKAGE}.main:app --host 0.0.0.0 --port 8080
