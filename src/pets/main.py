@@ -16,18 +16,16 @@ limitations under the License.
 from typing import List
 from fastapi import Depends, FastAPI, Query, status
 from sqlalchemy.orm import Session
-from data.database import engine, models, SessionLocal
+from data.database import create_session
 from data import schemas
 from . import crud
-
-models.Base.metadata.create_all(bind=engine)
 
 
 app = FastAPI(root_path="/pets")
 
 
 def get_db():
-    db = SessionLocal()
+    db = create_session()
     try:
         yield db
     finally:

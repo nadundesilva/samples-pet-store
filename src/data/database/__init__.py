@@ -18,13 +18,18 @@ from sqlalchemy import create_engine
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker
 
-DATABASE_URL = os.getenv("DATABASE_URL", "sqlite:///./sql_app.db")
+__DATABASE_URL = os.getenv("DATABASE_URL", "sqlite:///./sql_app.db")
 
-connect_args = {}
-if DATABASE_URL.startswith("sqlite"):
-    connect_args["check_same_thread"] = False
+__connect_args = {}
+if __DATABASE_URL.startswith("sqlite"):
+    __connect_args["check_same_thread"] = False
 
-engine = create_engine(DATABASE_URL, connect_args=connect_args)
-SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
+__engine = create_engine(__DATABASE_URL, connect_args=__connect_args)
+__SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=__engine)
 
 Base = declarative_base()
+Base.metadata.create_all(bind=__engine)
+
+
+def create_session():
+    return __SessionLocal()

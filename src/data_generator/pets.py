@@ -18,21 +18,22 @@ from .pet_store_api import call_api
 from data import schemas
 
 
-def get_all_pets() -> bool:
-    return call_api("GET", "/catalog", List[schemas.Pet])
+def __get_all_pets() -> bool:
+    return call_api("GET", "/catalog", schemas.Pet)
 
-def create_pet(pet: schemas.Pet) -> schemas.Pet:
+
+def __create_pet(pet: schemas.Pet) -> schemas.Pet:
     return call_api("POST", "/", schemas.Pet, pet)
 
 
 def generate() -> List[schemas.Pet]:
-    pets = get_all_pets()
-    if len(pets) > 0:
-        return pets 
+    db_pets = __get_all_pets()
+    if len(db_pets) > 0:
+        return db_pets
 
     pets = []
     pets.append(
-        create_pet(
+        __create_pet(
             schemas.Pet(
                 display_name="Labrador Retriever",
                 kind="Dog",
@@ -42,7 +43,7 @@ def generate() -> List[schemas.Pet]:
         )
     )
     pets.append(
-        create_pet(
+        __create_pet(
             schemas.Pet(
                 display_name="Golden Retriever",
                 kind="Dog",
@@ -52,7 +53,7 @@ def generate() -> List[schemas.Pet]:
         )
     )
     pets.append(
-        create_pet(
+        __create_pet(
             schemas.Pet(
                 display_name="German Shepherd",
                 kind="Dog",
@@ -62,7 +63,7 @@ def generate() -> List[schemas.Pet]:
         )
     )
     pets.append(
-        create_pet(
+        __create_pet(
             schemas.Pet(
                 display_name="Pembroke Welsh Corgi",
                 kind="Dog",
@@ -72,7 +73,7 @@ def generate() -> List[schemas.Pet]:
         )
     )
     pets.append(
-        create_pet(
+        __create_pet(
             schemas.Pet(
                 display_name="Savannah",
                 kind="Cat",
@@ -82,7 +83,7 @@ def generate() -> List[schemas.Pet]:
         )
     )
     pets.append(
-        create_pet(
+        __create_pet(
             schemas.Pet(
                 display_name="Bengal",
                 kind="Cat",
@@ -92,7 +93,7 @@ def generate() -> List[schemas.Pet]:
         )
     )
     pets.append(
-        create_pet(
+        __create_pet(
             schemas.Pet(
                 display_name="Common Goldfish",
                 kind="Fish",
@@ -102,7 +103,7 @@ def generate() -> List[schemas.Pet]:
         )
     )
     pets.append(
-        create_pet(
+        __create_pet(
             schemas.Pet(
                 display_name="Corydoras Catfish",
                 kind="Fish",
@@ -112,7 +113,7 @@ def generate() -> List[schemas.Pet]:
         )
     )
     pets.append(
-        create_pet(
+        __create_pet(
             schemas.Pet(
                 display_name="Syrian Hamster",
                 kind="Hamster",
@@ -121,4 +122,8 @@ def generate() -> List[schemas.Pet]:
             )
         )
     )
+
+    db_pets = __get_all_pets()
+    if len(db_pets) != len(pets):
+        raise Exception("Data inconsistency in generated pets")
     return pets

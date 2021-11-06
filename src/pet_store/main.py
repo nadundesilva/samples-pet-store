@@ -13,7 +13,6 @@ See the License for the specific language governing permissions and
 limitations under the License.
 """
 
-import json
 import os
 from urllib import parse
 from http.client import HTTPConnection
@@ -22,11 +21,12 @@ from fastapi.openapi.utils import get_openapi
 from typing import Any, List, Type
 from fastapi import FastAPI
 from data import schemas
+from data import convert
 
 app = FastAPI()
 
 
-def get_open_api_schema():
+def __get_open_api_schema():
     if app.openapi_schema:
         return app.openapi_schema
 
@@ -40,10 +40,10 @@ def get_open_api_schema():
     return app.openapi_schema
 
 
-app.openapi = get_open_api_schema
+app.openapi = __get_open_api_schema
 
 
-def get_pets_api_connection():
+def __get_pets_api_connection():
     connection = HTTPConnection(
         os.getenv("PETS_API_HOST"), int(os.getenv("PETS_API_PORT")), timeout=10
     )
@@ -53,13 +53,13 @@ def get_pets_api_connection():
         connection.close()
 
 
-def parse_client_response(
-    connection: HTTPConnection, incoming_req_response: Response, type: Type[Any]
+def __parse_client_response(
+    connection: HTTPConnection, incoming_req_response: Response, object_type: Type[Any]
 ):
     client_response = connection.getresponse()
     incoming_req_response.status_code = client_response.status
     if client_response.status == status.HTTP_200_OK:
-        return json.loads(client_response.read(), object_hook=lambda d: type(**d))
+        return convert.from_json(client_response.read(), object_type)
     return None
 
 
@@ -73,7 +73,7 @@ def get_pets_catalog(
     response: Response,
     limit: int = Query(default=100, lte=100),
     offset: int = 0,
-    pets_api_connection: HTTPConnection = Depends(get_pets_api_connection),
+    pets_api_connection: HTTPConnection = Depends(__get_pets_api_connection),
 ) -> List[schemas.Pet]:
     pets_api_connection.request(
         "GET",
@@ -82,15 +82,15 @@ def get_pets_catalog(
         + "&offset="
         + parse.quote(str(offset)),
     )
-    return parse_client_response(pets_api_connection, response, List[schemas.Pet])
+    return __parse_client_response(pets_api_connection, response, schemas.Pet)
 
 
 @app.post("/", response_model=schemas.Pet, status_code=status.HTTP_200_OK)
 def add_pet(
     response: Response,
     pet: schemas.Pet,
-    pets_api_connection: HTTPConnection = Depends(get_pets_api_connection),
+    pets_api_connection: HTTPConnection = Depends(__get_pets_api_connection),
 ) -> schemas.Pet:
-    body = bytes(json.dumps(dict(pet)), "utf-8")
+    body = bytes(convert.to_json(pet), "utf-8")
     pets_api_connection.request("POST", "/", body=body)
-    return parse_client_response(pets_api_connection, response, schemas.Pet)
+    return __parse_client_response(pets_api_connection, response, schemas.Pet)
