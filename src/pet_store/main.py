@@ -13,6 +13,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 """
 
+import logging
 import os
 from urllib import parse
 from http.client import HTTPConnection
@@ -22,6 +23,8 @@ from typing import Any, List, Type
 from fastapi import FastAPI
 from data import schemas
 from data import convert
+
+logger = logging.getLogger(__name__)
 
 app = FastAPI()
 
@@ -82,7 +85,9 @@ def get_pets_catalog(
         + "&offset="
         + parse.quote(str(offset)),
     )
-    return __parse_client_response(pets_api_connection, response, schemas.Pet)
+    pets = __parse_client_response(pets_api_connection, response, schemas.Pet)
+    logger.debug("Found " + str(len(pets)) + " available pets")
+    return pets
 
 
 @app.post("/", response_model=schemas.Pet, status_code=status.HTTP_200_OK)
@@ -93,4 +98,11 @@ def add_pet(
 ) -> schemas.Pet:
     body = bytes(convert.to_json(pet), "utf-8")
     pets_api_connection.request("POST", "/", body=body)
-    return __parse_client_response(pets_api_connection, response, schemas.Pet)
+    created_pet = __parse_client_response(pets_api_connection, response, schemas.Pet)
+    logger.debug(
+        "Created pet "
+        + str(created_pet.display_name)
+        + " of kind "
+        + str(created_pet.kind)
+    )
+    return created_pet

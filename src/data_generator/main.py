@@ -13,8 +13,14 @@ See the License for the specific language governing permissions and
 limitations under the License.
 """
 
+import logging
 from . import pets
 
 
+logger = logging.getLogger(__name__)
+
+
 def generate_data():
+    logger.info("Generating sample data started")
     pets.generate()
+    logger.info("Generating sample data completed")

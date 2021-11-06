@@ -13,9 +13,13 @@ See the License for the specific language governing permissions and
 limitations under the License.
 """
 
+import logging
 from typing import List
 from .pet_store_api import call_api
 from data import schemas
+
+
+logger = logging.getLogger(__name__)
 
 
 def __get_all_pets() -> bool:
@@ -29,6 +33,11 @@ def __create_pet(pet: schemas.Pet) -> schemas.Pet:
 def generate() -> List[schemas.Pet]:
     db_pets = __get_all_pets()
     if len(db_pets) > 0:
+        logger.warning(
+            "Pet data not genreated as "
+            + str(len(db_pets))
+            + " pet(s) is already present in DB"
+        )
         return db_pets
 
     pets = []
@@ -126,4 +135,5 @@ def generate() -> List[schemas.Pet]:
     db_pets = __get_all_pets()
     if len(db_pets) != len(pets):
         raise Exception("Data inconsistency in generated pets")
+    logger.info("Generated pets sample data completed")
     return pets
