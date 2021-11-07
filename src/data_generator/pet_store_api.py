@@ -13,16 +13,17 @@ See the License for the specific language governing permissions and
 limitations under the License.
 """
 
-from typing import Any, Type
-from data import convert
+from typing import Type
 from apis import connections, client as api_client
+from pydantic import BaseModel
 
 
-def call(method: str, url: str, object_type: Type[Any], body: Any = None) -> Any:
+def call(
+    method: str, url: str, model_type: Type[BaseModel], body: BaseModel = None
+) -> BaseModel:
     connection = next(connections.pet_store_api())
-    body_bytes = bytes(convert.to_json(body), "utf-8") if body is not None else None
     response_body, status_code = api_client.call(
-        connection, method, url, body=body_bytes, object_type=object_type
+        connection, method, url, model_type, body
     )
     if status_code != 200:
         raise Exception(

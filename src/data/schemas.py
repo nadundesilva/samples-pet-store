@@ -14,7 +14,7 @@ limitations under the License.
 """
 
 import datetime
-from typing import Optional
+from typing import Dict, Literal, Optional, Union
 from pydantic import BaseModel
 
 
@@ -44,6 +44,21 @@ class Order(BaseModel):
 class OrderItem(BaseModel):
     id: Optional[int]
     pet_id: int
-    order_id: int
+    order_id: Optional[int]
     amount: int
     unit_price: int
+
+
+class Health(BaseModel):
+    status: Union[Literal["READY"], Literal["UNAVAILABLE"]]
+    dependencies: Dict[str, "Health"]
+
+
+class Reservation(BaseModel):
+    status: Union[Literal["RESERVED"], Literal["OUT_OF_STOCK"]]
+    pet: Pet
+
+
+class Error(BaseModel):
+    status: Literal["ERROR"] = "ERROR"
+    message: str

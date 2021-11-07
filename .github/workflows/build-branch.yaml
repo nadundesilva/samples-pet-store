@@ -136,7 +136,7 @@ jobs:
           echo
           echo "Testing the health of the services"
           SERVER_OUTPUT=$(curl http://localhost:8080/health | jq -r .status)
-          if [ ! "$SERVER_OUTPUT" == "Ready" ]; then
+          if [ ! "$SERVER_OUTPUT" == "READY" ]; then
             exit 1
           fi
         env:

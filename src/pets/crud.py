@@ -13,21 +13,11 @@ See the License for the specific language governing permissions and
 limitations under the License.
 """
 
-from typing import List
+from typing import List, Tuple
 from sqlalchemy.orm import Session
+from sqlalchemy.sql.sqltypes import Boolean
 from . import db_models as models
 from data import schemas
-
-
-def get_available_pets(db: Session, limit: int, offset: int) -> List[schemas.Pet]:
-    db_pets = (
-        db.query(models.Pet)
-        .filter(models.Pet.available_amount > 0)
-        .limit(limit)
-        .offset(offset)
-        .all()
-    )
-    return [schemas.Pet(**db_pet.__dict__) for db_pet in db_pets]
 
 
 def create_pet(db: Session, pet: schemas.Pet) -> schemas.Pet:
@@ -41,3 +31,27 @@ def create_pet(db: Session, pet: schemas.Pet) -> schemas.Pet:
     db.commit()
     db.refresh(db_pet)
     return schemas.Pet(**db_pet.__dict__)
+
+
+def get_available_pets(db: Session, limit: int, offset: int) -> List[schemas.Pet]:
+    db_pets = (
+        db.query(models.Pet)
+        .filter(models.Pet.available_amount > 0)
+        .limit(limit)
+        .offset(offset)
+        .all()
+    )
+    return [schemas.Pet(**db_pet.__dict__) for db_pet in db_pets]
+
+
+def reserve_pet(db: Session, pet_id: int, amount: int) -> Tuple[Boolean, int]:
+    db_pet = db.query(models.Pet).filter(models.Pet.id == pet_id).first()
+
+    is_success = False
+    if db_pet.available_amount > amount:
+        db_pet.available_amount = models.Pet.available_amount - amount
+        db.commit()
+        db.refresh(db_pet)
+        is_success = True
+
+    return is_success, schemas.Pet(**db_pet.__dict__)

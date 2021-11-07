@@ -24,3 +24,16 @@ def create_order(db: Session, order: schemas.Order) -> schemas.Order:
     db.commit()
     db.refresh(db_order)
     return schemas.Order(**db_order.__dict__)
+
+
+def create_order_item(db: Session, order_item: schemas.OrderItem):
+    db_order_item = models.OrderItem(
+        pet_id=order_item.pet_id,
+        order_id=order_item.order_id,
+        amount=order_item.amount,
+        unit_price=order_item.unit_price,
+    )
+    db.add(db_order_item)
+    db.commit()
+    db.refresh(db_order_item)
+    return schemas.OrderItem(**db_order_item.__dict__)

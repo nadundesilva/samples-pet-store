@@ -18,10 +18,9 @@ from urllib import parse
 from http.client import HTTPConnection
 from fastapi import Depends, FastAPI, Query, Response, status
 from fastapi.openapi.utils import get_openapi
-from typing import Dict, List, Literal, TypedDict, Union
+from typing import Dict, List, Union
 from fastapi import FastAPI
 from data import schemas
-from data import convert
 from apis import connections, client as api_client
 
 logger = logging.getLogger(__name__)
@@ -46,34 +45,31 @@ def __get_open_api_schema():
 app.openapi = __get_open_api_schema
 
 
-class HealthStatus(TypedDict):
-    status: Union[Literal["Ready"], Literal["Unavailable"]]
-    dependencies: Dict[str, "HealthStatus"]
-
-
-@app.get("/health")
+@app.get("/health", response_model=schemas.Health, status_code=status.HTTP_200_OK)
 def check_health(
     response: Response,
     pets_api_connection: HTTPConnection = Depends(connections.pets_api),
-) -> HealthStatus:
+) -> schemas.Health:
     dependency_connections = {"pets-api": pets_api_connection}
 
-    api_status = "Ready"
-    dependency_health: Dict[str, HealthStatus] = {}
+    api_status = "READY"
+    dependency_health: Dict[str, schemas.Health] = {}
     for api_name, connection in dependency_connections.items():
-        dependency_status, status_code = api_client.call(connection, "GET", "/health")
-        if api_status == "Ready" and (
-            status_code != 200 or dependency_status["status"] != "Ready"
+        dependency_status, status_code = api_client.call(
+            connection, "GET", "/health", schemas.Health
+        )
+        if api_status == "READY" and (
+            status_code != 200 or dependency_status.status != "READY"
         ):
-            api_status = "Unavailable"
+            api_status = "UNAVAILABLE"
             response.status_code = 503
 
         if status_code == 200:
             dependency_health[api_name] = dependency_status
         else:
-            dependency_health[api_name] = {"status": "Unavailable"}
+            dependency_health[api_name] = {"status": "UNAVAILABLE"}
 
-    return {"status": "Ready", "dependencies": dependency_health}
+    return {"status": "READY", "dependencies": dependency_health}
 
 
 @app.get("/catalog", response_model=List[schemas.Pet], status_code=status.HTTP_200_OK)
@@ -87,7 +83,7 @@ def get_pets_catalog(
         pets_api_connection,
         "GET",
         "/?limit=" + parse.quote(str(limit)) + "&offset=" + parse.quote(str(offset)),
-        object_type=schemas.Pet,
+        schemas.Pet,
     )
     logger.debug("Found " + str(len(pets)) + " available pets")
     return pets
@@ -99,9 +95,8 @@ def add_pet(
     pet: schemas.Pet,
     pets_api_connection: HTTPConnection = Depends(connections.pets_api),
 ) -> schemas.Pet:
-    body = bytes(convert.to_json(pet), "utf-8")
     created_pet, status_code = api_client.call(
-        pets_api_connection, "POST", "/", body=body, object_type=schemas.Pet
+        pets_api_connection, "POST", "/", schemas.Pet, pet
     )
     response.status_code = status_code
     if status_code == 200:
@@ -122,6 +117,7 @@ def add_pet(
             + " with status code "
             + str(status_code)
         )
+        return schemas.Error(message="Failed to create catalog item")
     return created_pet
 
 
@@ -131,13 +127,8 @@ def add_customer(
     customer: schemas.Customer,
     customers_api_connection: HTTPConnection = Depends(connections.customers_api),
 ) -> schemas.Customer:
-    body = bytes(convert.to_json(customer), "utf-8")
     created_customer, status_code = api_client.call(
-        customers_api_connection,
-        "POST",
-        "/",
-        body=body,
-        object_type=schemas.Customer,
+        customers_api_connection, "POST", "/", schemas.Customer, customer
     )
     response.status_code = status_code
     if status_code == 200:
@@ -146,6 +137,7 @@ def add_customer(
         logger.error(
             "Failed to create a new customer with status code " + str(status_code)
         )
+        return schemas.Error(message="Failed to create customer")
 
     return created_customer
 
@@ -156,13 +148,12 @@ def add_order(
     order: schemas.Order,
     orders_api_connection: HTTPConnection = Depends(connections.orders_api),
 ) -> schemas.Order:
-    body = bytes(convert.to_json(order), "utf-8")
     created_order, status_code = api_client.call(
         orders_api_connection,
         "POST",
         "/",
-        body=body,
-        object_type=schemas.Order,
+        schemas.Order,
+        order,
     )
     response.status_code = status_code
     if status_code == 200:
@@ -171,5 +162,73 @@ def add_order(
         logger.error(
             "Failed to create a new order with status code " + str(status_code)
         )
+        return schemas.Error(message="Failed to create order")
+
+    return created_order
+
+
+@app.post(
+    "/orders/{order_id}/items",
+    response_model=Union[schemas.OrderItem, schemas.Error],
+    status_code=status.HTTP_200_OK,
+)
+def add_order_item(
+    response: Response,
+    order_id: int,
+    pet_id: int,
+    amount: int = Query(default=1, gt=0),
+    pets_api_connection: HTTPConnection = Depends(connections.pets_api),
+    orders_api_connection: HTTPConnection = Depends(connections.orders_api),
+) -> schemas.Order:
+    reservation, status_code = api_client.call(
+        pets_api_connection,
+        "PATCH",
+        "/"
+        + parse.quote(str(pet_id))
+        + "/reservation?amount="
+        + parse.quote(str(amount)),
+        schemas.Reservation,
+    )
+    response.status_code = status_code
+    if status_code != 200:
+        logger.debug(
+            "Creation of order item with ID "
+            + str(order_id)
+            + " failed due to pet with ID "
+            + str(pet_id)
+            + " not found"
+        )
+        return schemas.Error(message="Pet with ID " + str(pet_id) + " not found")
+    elif reservation.status == "UNAVAILABLE":
+        logger.debug(
+            "Creation of order item with ID "
+            + str(order_id)
+            + " failed due to pet with ID "
+            + str(pet_id)
+            + " being out of stock"
+        )
+        return schemas.Error(message="Pet with ID " + str(pet_id) + " out of stock")
+
+    order_item = schemas.OrderItem(
+        pet_id=pet_id,
+        order_id=order_id,
+        amount=amount,
+        unit_price=reservation.pet.current_price,
+    )
+    created_order, status_code = api_client.call(
+        orders_api_connection,
+        "POST",
+        "/" + parse.quote(str(order_id)) + "/items",
+        schemas.OrderItem,
+        order_item,
+    )
+    response.status_code = status_code
+    if status_code == 200:
+        logger.debug("Created a new order with ID " + str(created_order.id))
+    else:
+        logger.error(
+            "Failed to create a new order with status code " + str(status_code)
+        )
+        return schemas.Error(message="Failed to create order item")
 
     return created_order

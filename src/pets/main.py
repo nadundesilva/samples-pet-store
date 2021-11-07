@@ -13,7 +13,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 """
 
-from typing import List
+from typing import List, Union
 from fastapi import Depends, FastAPI, Query, status
 from sqlalchemy.orm import Session
 from data.database import db_session
@@ -23,9 +23,9 @@ from . import crud
 app = FastAPI(root_path="/pets")
 
 
-@app.get("/health", status_code=status.HTTP_200_OK)
+@app.get("/health", response_model=schemas.Health, status_code=status.HTTP_200_OK)
 def check_health():
-    return {"status": "Ready"}
+    return {"status": "READY"}
 
 
 @app.get("/", response_model=List[schemas.Pet], status_code=status.HTTP_200_OK)
@@ -34,12 +34,29 @@ def get_pets_catalog(
     offset: int = 0,
     db: Session = Depends(db_session),
 ) -> List[schemas.Pet]:
-    ret = crud.get_available_pets(db, limit, offset)
-    return ret
+    return crud.get_available_pets(db, limit, offset)
 
 
-@app.post("/", response_model=schemas.Pet, status_code=status.HTTP_200_OK)
+@app.patch(
+    "/{pet_id}/reservation",
+    response_model=schemas.Reservation,
+    status_code=status.HTTP_200_OK,
+)
+def reserve_pet(
+    pet_id: int, amount: int = Query(default=1, gt=0), db: Session = Depends(db_session)
+) -> schemas.Pet:
+    is_success, pet = crud.reserve_pet(db, pet_id, amount)
+    return schemas.Reservation(
+        status=("RESERVED" if is_success else "OUT_OF_STOCK"), pet=pet
+    )
+
+
+@app.post(
+    "/",
+    response_model=Union[schemas.Pet, schemas.Error],
+    status_code=status.HTTP_200_OK,
+)
 def add_pet(pet: schemas.Pet, db: Session = Depends(db_session)) -> schemas.Pet:
     if pet.id is not None:
-        raise Exception("ID for new pets should not be specified")
+        return schemas.Error(message="ID for new pets should not be specified")
     return crud.create_pet(db, pet=pet)

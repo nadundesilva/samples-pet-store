@@ -13,6 +13,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 """
 
+from typing import Union
 from fastapi import Depends, FastAPI, status
 from sqlalchemy.orm import Session
 from data.database import db_session
@@ -22,20 +23,24 @@ from . import crud
 app = FastAPI(root_path="/customers")
 
 
-@app.get("/health", status_code=status.HTTP_200_OK)
+@app.get("/health", response_model=schemas.Health, status_code=status.HTTP_200_OK)
 def check_health():
-    return {"status": "Ready"}
+    return {"status": "UNAVAILABLE"}
 
 
-@app.post("/", response_model=schemas.Customer, status_code=status.HTTP_200_OK)
+@app.post(
+    "/",
+    response_model=Union[schemas.Customer, schemas.Error],
+    status_code=status.HTTP_200_OK,
+)
 def add_pet(
     customer: schemas.Customer, db: Session = Depends(db_session)
 ) -> schemas.Customer:
     if customer.id is not None:
-        raise Exception("ID for new customers should not be specified")
+        return schemas.Error(message="ID for new customers should not be specified")
     if len(customer.contact_number) != 12:
-        raise Exception(
-            "Invalid length of contact number of customer; expected 12, but received "
+        return schemas.Error(
+            message="Invalid length of contact number of customer; expected 12, but received "
             + str(len(customer.contact_number))
         )
 

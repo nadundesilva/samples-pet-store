@@ -13,11 +13,11 @@ See the License for the specific language governing permissions and
 limitations under the License.
 """
 
+import json
 import logging
 from http.client import HTTPConnection
-from typing import Any, Tuple, Type
-
-from data import convert
+from typing import Tuple, Type
+from pydantic import BaseModel
 
 logger = logging.getLogger(__name__)
 
@@ -26,16 +26,33 @@ def call(
     connection: HTTPConnection,
     method: str,
     url: str,
-    body: bytes = None,
-    object_type: Type[Any] = None,
-) -> Tuple[Any, int]:
-    connection.request(method, url, body=body)
+    model_type: Type[BaseModel],
+    body: BaseModel = None,
+) -> Tuple[BaseModel, int]:
+    connection.request(
+        method, url, body=(None if body is None else bytes(body.json(), "utf-8"))
+    )
     response = connection.getresponse()
     if response.status == 200:
-        return convert.from_json(response.read(), object_type), response.status
+        logger.debug(
+            "Received response for API call "
+            + method
+            + " "
+            + url
+            + " with status code "
+            + str(response.status)
+        )
+
+        response_body = response.read()
+        json_dict = json.loads(response_body)
+        return model_type(**json_dict), response.status
     else:
         logger.error(
-            "API call failed with status code "
+            "API call "
+            + method
+            + " "
+            + url
+            + " failed with status code "
             + str(response.status)
             + " and response body "
             + str(response.read())
