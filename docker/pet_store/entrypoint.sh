@@ -21,4 +21,4 @@ do
    dockerize -wait "${dependency}" --timeout 1m
 done
 
-uvicorn ${PET_STORE_PACKAGE}.main:app --host 0.0.0.0 --port 8080
+uvicorn ${PET_STORE_PACKAGE}.main:app --host 0.0.0.0 --port 8080 --header server:pet-store-server
