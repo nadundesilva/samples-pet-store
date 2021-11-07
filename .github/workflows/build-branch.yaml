@@ -90,7 +90,7 @@ jobs:
         uses: codecov/codecov-action@v1
         with:
           fail_ci_if_error: true
-      - name: Log in to the Container registry
+      - name: Login to the Container registry
         uses: docker/login-action@v1
         with:
           registry: ghcr.io
@@ -105,12 +105,19 @@ jobs:
           VERSION: latest
       - name: Test Service Startup
         run: |
+          echo "Purging all docker data for the test"
+          docker logout ghcr.io
+          docker rm -f $(docker ps -a -q)
+          docker rmi -f $(docker images -a -q)
+
           cleanup() {
             docker-compose logs
+            echo "Cleaning up containers"
             docker-compose down
           }
           trap cleanup EXIT
 
+          echo "Starting services"
           docker-compose up --no-build --force-recreate --renew-anon-volumes --detach
 
           export DOCKERIZE_VERSION=v0.6.1
@@ -119,6 +126,7 @@ jobs:
           rm dockerize-linux-amd64-${DOCKERIZE_VERSION}.tar.gz
           dockerize -wait http://localhost:8080/health -timeout 2m
 
+          echo "Testing the health of the services"
           SERVER_OUTPUT=$(curl http://localhost:8080/health | jq -r .status)
           if [ ! "$SERVER_OUTPUT" == "Ready" ]; then
             exit 1
