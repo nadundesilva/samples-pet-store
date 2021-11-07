@@ -13,15 +13,14 @@ See the License for the specific language governing permissions and
 limitations under the License.
 """
 
-import logging
-from . import pets, customers, orders
+from sqlalchemy.orm import Session
+from data.database import models
+from data import schemas
 
-logger = logging.getLogger(__name__)
 
-
-def generate_data() -> None:
-    logger.info("Generating sample data started")
-    created_pets = pets.generate()
-    created_customers = customers.generate()
-    orders.generate(created_customers, created_pets)
-    logger.info("Generating sample data completed")
+def create_order(db: Session, order: schemas.Order) -> schemas.Order:
+    db_order = models.Order(customer_id=order.customer_id)
+    db.add(db_order)
+    db.commit()
+    db.refresh(db_order)
+    return schemas.Order(**db_order.__dict__)

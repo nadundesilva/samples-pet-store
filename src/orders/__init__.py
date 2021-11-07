@@ -14,14 +14,7 @@ limitations under the License.
 """
 
 import logging
-from . import pets, customers, orders
+import os
 
-logger = logging.getLogger(__name__)
-
-
-def generate_data() -> None:
-    logger.info("Generating sample data started")
-    created_pets = pets.generate()
-    created_customers = customers.generate()
-    orders.generate(created_customers, created_pets)
-    logger.info("Generating sample data completed")
+LOG_LEVEL = os.environ.get("LOG_LEVEL", "DEBUG").upper()
+logging.basicConfig(level=LOG_LEVEL)

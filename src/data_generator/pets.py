@@ -100,5 +100,5 @@ def generate() -> List[schemas.Pet]:
             )
         ),
     ]
-    logger.info("Generated " + str(len(pets)) + " sample pet(s) completed")
+    logger.info("Generating " + str(len(pets)) + " sample pet(s) completed")
     return pets

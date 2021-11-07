@@ -146,3 +146,28 @@ def add_customer(
         )
 
     return created_customer
+
+
+@app.post("/orders", response_model=schemas.Order, status_code=status.HTTP_200_OK)
+def add_order(
+    response: Response,
+    order: schemas.Order,
+    orders_api_connection: HTTPConnection = Depends(connections.orders_api),
+) -> schemas.Order:
+    body = bytes(convert.to_json(order), "utf-8")
+    created_order, status_code = api_client.call(
+        orders_api_connection,
+        "POST",
+        "/",
+        body=body,
+        object_type=schemas.Order,
+    )
+    response.status_code = status_code
+    if status_code == 200:
+        logger.debug("Created a new order with ID " + str(created_order.id))
+    else:
+        logger.error(
+            "Failed to create a new order with status code " + str(status_code)
+        )
+
+    return created_order

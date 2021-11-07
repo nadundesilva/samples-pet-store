@@ -13,8 +13,9 @@ See the License for the specific language governing permissions and
 limitations under the License.
 """
 
-from sqlalchemy import Column, ForeignKey, Integer, String, Text, Time
+from sqlalchemy import Column, DateTime, ForeignKey, Integer, String, Text
 from sqlalchemy.orm import relationship
+from sqlalchemy.sql import func
 from . import Base
 
 
@@ -25,7 +26,7 @@ class Pet(Base):
     display_name = Column(String)
     kind = Column(String)
     current_price = Column(Integer)
-    available_amount = Column(Integer)
+    available_amount = Column(Integer, default=0)
 
 
 class Customer(Base):
@@ -40,6 +41,18 @@ class Customer(Base):
     orders = relationship("Order", back_populates="customer")
 
 
+class Order(Base):
+    __tablename__ = "orders"
+
+    id = Column(Integer, primary_key=True, index=True)
+    customer_id = Column(Integer, ForeignKey("customers.id"))
+    creation_timestamp = Column(DateTime(timezone=True), server_default=func.now())
+    payment_timestamp = Column(DateTime(timezone=True))
+
+    items = relationship("OrderItem", back_populates="order")
+    customer = relationship("Customer", back_populates="orders")
+
+
 class OrderItem(Base):
     __tablename__ = "order_items"
 
@@ -51,14 +64,3 @@ class OrderItem(Base):
 
     order = relationship("Order", back_populates="items")
     pet = relationship("Pet")
-
-
-class Order(Base):
-    __tablename__ = "orders"
-
-    id = Column(Integer, primary_key=True, index=True)
-    customer_id = Column(Integer, ForeignKey("customers.id"))
-    payment_timestamp = Column(Time)
-
-    items = relationship("OrderItem", back_populates="order")
-    customer = relationship("Customer", back_populates="orders")

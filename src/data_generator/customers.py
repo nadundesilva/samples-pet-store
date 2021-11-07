@@ -60,5 +60,5 @@ def generate() -> List[schemas.Customer]:
             )
         ),
     ]
-    logger.info("Generated " + str(len(customers)) + " sample customer(s) completed")
+    logger.info("Generating " + str(len(customers)) + " sample customer(s) completed")
     return customers

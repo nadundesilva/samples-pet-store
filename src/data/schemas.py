@@ -13,6 +13,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 """
 
+import datetime
 from typing import Optional
 from pydantic import BaseModel
 
@@ -31,3 +32,18 @@ class Customer(BaseModel):
     last_name: str
     delivery_address: str
     contact_number: str
+
+
+class Order(BaseModel):
+    id: Optional[int]
+    customer_id: int
+    creation_timestamp: Optional[datetime.datetime]
+    payment_timestamp: Optional[datetime.datetime]
+
+
+class OrderItem(BaseModel):
+    id: Optional[int]
+    pet_id: int
+    order_id: int
+    amount: int
+    unit_price: int

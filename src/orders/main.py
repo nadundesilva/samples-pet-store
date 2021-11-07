@@ -19,7 +19,7 @@ from data.database import db_session
 from data import schemas
 from . import crud
 
-app = FastAPI(root_path="/customers")
+app = FastAPI(root_path="/orders")
 
 
 @app.get("/health", status_code=status.HTTP_200_OK)
@@ -27,16 +27,13 @@ def check_health():
     return {"status": "Ready"}
 
 
-@app.post("/", response_model=schemas.Customer, status_code=status.HTTP_200_OK)
-def add_pet(
-    customer: schemas.Customer, db: Session = Depends(db_session)
-) -> schemas.Customer:
-    if customer.id is not None:
-        raise Exception("ID for new customers should not be specified")
-    if len(customer.contact_number) != 12:
-        raise Exception(
-            "Invalid length of contact number of customer; expected 12, but received "
-            + str(len(customer.contact_number))
-        )
+@app.post("/", response_model=schemas.Order, status_code=status.HTTP_200_OK)
+def add_order(order: schemas.Order, db: Session = Depends(db_session)) -> schemas.Order:
+    if order.id is not None:
+        raise Exception("ID for new orders should not be specified")
+    if order.creation_timestamp is not None:
+        raise Exception("Creation timestamp for new orders should not be specified")
+    if order.payment_timestamp is not None:
+        raise Exception("Payment timestamp for new orders should not be specified")
 
-    return crud.create_customer(db, customer=customer)
+    return crud.create_order(db, order=order)
