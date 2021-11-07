@@ -38,8 +38,6 @@ class Customer(Base):
     delivery_address = Column(Text)
     contact_number = Column(String)
 
-    orders = relationship("Order", back_populates="customer")
-
 
 class Order(Base):
     __tablename__ = "orders"
@@ -50,7 +48,6 @@ class Order(Base):
     payment_timestamp = Column(DateTime(timezone=True))
 
     items = relationship("OrderItem", back_populates="order")
-    customer = relationship("Customer", back_populates="orders")
 
 
 class OrderItem(Base):
@@ -63,4 +60,3 @@ class OrderItem(Base):
     unit_price = Column(Integer)
 
     order = relationship("Order", back_populates="items")
-    pet = relationship("Pet")
