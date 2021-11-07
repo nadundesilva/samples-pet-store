@@ -23,7 +23,7 @@ def create_order(db: Session, order: schemas.Order) -> schemas.Order:
     db.add(db_order)
     db.commit()
     db.refresh(db_order)
-    return schemas.Order(**db_order.__dict__)
+    return schemas.Order.from_orm(db_order)
 
 
 def create_order_item(db: Session, order_item: schemas.OrderItem):
@@ -36,4 +36,4 @@ def create_order_item(db: Session, order_item: schemas.OrderItem):
     db.add(db_order_item)
     db.commit()
     db.refresh(db_order_item)
-    return schemas.OrderItem(**db_order_item.__dict__)
+    return schemas.OrderItem.from_orm(db_order_item)

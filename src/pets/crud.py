@@ -30,7 +30,7 @@ def create_pet(db: Session, pet: schemas.Pet) -> schemas.Pet:
     db.add(db_pet)
     db.commit()
     db.refresh(db_pet)
-    return schemas.Pet(**db_pet.__dict__)
+    return schemas.Pet.from_orm(db_pet)
 
 
 def get_available_pets(db: Session, limit: int, offset: int) -> List[schemas.Pet]:
@@ -41,7 +41,7 @@ def get_available_pets(db: Session, limit: int, offset: int) -> List[schemas.Pet
         .offset(offset)
         .all()
     )
-    return [schemas.Pet(**db_pet.__dict__) for db_pet in db_pets]
+    return [schemas.Pet.from_orm(db_pet) for db_pet in db_pets]
 
 
 def reserve_pet(db: Session, pet_id: int, amount: int) -> Tuple[Boolean, int]:
@@ -54,4 +54,4 @@ def reserve_pet(db: Session, pet_id: int, amount: int) -> Tuple[Boolean, int]:
         db.refresh(db_pet)
         is_success = True
 
-    return is_success, schemas.Pet(**db_pet.__dict__)
+    return is_success, schemas.Pet.from_orm(db_pet)

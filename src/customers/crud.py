@@ -28,4 +28,4 @@ def create_customer(db: Session, customer: schemas.Customer) -> schemas.Customer
     db.add(db_customer)
     db.commit()
     db.refresh(db_customer)
-    return schemas.Customer(**db_customer.__dict__)
+    return schemas.Customer.from_orm(db_customer)
