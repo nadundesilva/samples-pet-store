@@ -96,10 +96,11 @@ jobs:
           registry: ghcr.io
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
-      - name: Build Docker Image
+      - name: Build & Push Docker Image
         run: |
           sudo apt install docker-compose
           docker-compose build
+          docker-compose push
         env:
           VERSION: latest
       - name: Test Service Startup
@@ -110,22 +111,17 @@ jobs:
           }
           trap cleanup EXIT
 
-          docker-compose up -d
+          docker-compose up --no-build --force-recreate --renew-anon-volumes --detach
 
           export DOCKERIZE_VERSION=v0.6.1
           wget https://github.com/jwilder/dockerize/releases/download/${DOCKERIZE_VERSION}/dockerize-linux-amd64-${DOCKERIZE_VERSION}.tar.gz
           tar -C /usr/local/bin -xzvf dockerize-linux-amd64-${DOCKERIZE_VERSION}.tar.gz
           rm dockerize-linux-amd64-${DOCKERIZE_VERSION}.tar.gz
-          dockerize -wait http://localhost:8080/health -timeout 5m
+          dockerize -wait http://localhost:8080/health -timeout 2m
 
           SERVER_OUTPUT=$(curl http://localhost:8080/health | jq -r .status)
           if [ ! "$SERVER_OUTPUT" == "Ready" ]; then
             exit 1
           fi
-        env:
-          VERSION: latest
-      - name: Push Docker Image
-        run: |
-          docker-compose push
         env:
           VERSION: latest
