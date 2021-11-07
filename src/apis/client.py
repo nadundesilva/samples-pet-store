@@ -44,8 +44,13 @@ def call(
         )
 
         response_body = response.read()
-        json_dict = json.loads(response_body)
-        return model_type(**json_dict), response.status
+        parsed_body = json.loads(response_body)
+        if isinstance(parsed_body, list):
+            return [
+                model_type(**parsed_body_item) for parsed_body_item in parsed_body
+            ], response.status
+        else:
+            return model_type(**parsed_body), response.status
     else:
         logger.error(
             "API call "

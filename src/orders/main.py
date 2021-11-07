@@ -13,9 +13,10 @@ See the License for the specific language governing permissions and
 limitations under the License.
 """
 
-from typing import Union
+from typing import List, Union
 from fastapi import Depends, FastAPI, status
 from sqlalchemy.orm import Session
+from starlette.status import HTTP_200_OK
 from data.database import db_session
 from data import schemas
 from . import crud
@@ -26,6 +27,13 @@ app = FastAPI(root_path="/orders")
 @app.get("/health", response_model=schemas.Health, status_code=status.HTTP_200_OK)
 def check_health():
     return schemas.Health(status=schemas.HealthStatus.ready)
+
+
+@app.get("/", response_model=List[schemas.Order], status_code=HTTP_200_OK)
+def get_orders(
+    customer_id: int, db: Session = Depends(db_session)
+) -> List[schemas.Order]:
+    return crud.get_orders(db, customer_id)
 
 
 @app.post(

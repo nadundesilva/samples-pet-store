@@ -13,6 +13,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 """
 
+from typing import List
 from sqlalchemy.orm import Session
 from . import db_models as models
 from data import schemas
@@ -37,3 +38,10 @@ def create_order_item(db: Session, order_item: schemas.OrderItem):
     db.commit()
     db.refresh(db_order_item)
     return schemas.OrderItem.from_orm(db_order_item)
+
+
+def get_orders(db: Session, customer_id: id) -> List[schemas.Order]:
+    db_orders = (
+        db.query(models.Order).filter(models.Order.customer_id == customer_id).all()
+    )
+    return [schemas.Order.from_orm(db_order) for db_order in db_orders]

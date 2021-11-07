@@ -97,6 +97,24 @@ def get_pets_catalog(
     return pets
 
 
+@app.get("/orders", response_model=List[schemas.Order], status_code=status.HTTP_200_OK)
+def get_all_orders(
+    response: Response,
+    customer_id: int,
+    orders_api_connection: HTTPConnection = Depends(connections.orders_api),
+) -> List[schemas.Order]:
+    orders, response.status_code = api_client.call(
+        orders_api_connection,
+        "GET",
+        "/?customer_id=" + parse.quote(str(customer_id)),
+        schemas.Order,
+    )
+    logger.debug(
+        "Found " + str(len(orders)) + " orders of customer " + str(customer_id)
+    )
+    return orders
+
+
 @app.post("/catalog", response_model=schemas.Pet, status_code=status.HTTP_200_OK)
 def add_pet(
     response: Response,

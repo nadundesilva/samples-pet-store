@@ -14,7 +14,7 @@ limitations under the License.
 """
 
 import datetime
-from typing import Dict, Literal, Optional
+from typing import Dict, List, Literal, Optional
 from pydantic import BaseModel
 from enum import Enum
 from pydantic.main import Extra
@@ -23,6 +23,7 @@ from pydantic.types import conint, constr, condecimal
 
 class BaseSchema(BaseModel):
     class Config:
+        validate_all = True
         frozen = True
         use_enum_values = True
         validate_assignment = True
@@ -58,19 +59,20 @@ class Customer(BaseDataSchema):
     )
 
 
-class Order(BaseDataSchema):
-    id: Optional[conint(strict=True, gt=0)]
-    customer_id: conint(strict=True, gt=0)
-    creation_timestamp: Optional[datetime.datetime]
-    payment_timestamp: Optional[datetime.datetime]
-
-
 class OrderItem(BaseDataSchema):
     id: Optional[conint(strict=True, gt=0)]
     pet_id: conint(strict=True, gt=0)
     order_id: Optional[conint(strict=True, gt=0)]
     amount: conint(strict=True, gt=0)
     unit_price: condecimal(gt=0, max_digits=13, decimal_places=4)
+
+
+class Order(BaseDataSchema):
+    id: Optional[conint(strict=True, gt=0)]
+    customer_id: conint(strict=True, gt=0)
+    creation_timestamp: Optional[datetime.datetime]
+    payment_timestamp: Optional[datetime.datetime]
+    items: Optional[List[OrderItem]]
 
 
 class HealthStatus(str, Enum):
