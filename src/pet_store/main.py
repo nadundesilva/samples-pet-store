@@ -49,27 +49,35 @@ app.openapi = __get_open_api_schema
 def check_health(
     response: Response,
     pets_api_connection: HTTPConnection = Depends(connections.pets_api),
+    customers_api_connection: HTTPConnection = Depends(connections.customers_api),
+    orders_api_connection: HTTPConnection = Depends(connections.orders_api),
 ) -> schemas.Health:
-    dependency_connections = {"pets-api": pets_api_connection}
+    dependency_connections = {
+        "pets-api": pets_api_connection,
+        "customers-api": customers_api_connection,
+        "orders-api": orders_api_connection,
+    }
 
-    api_status = "READY"
-    dependency_health: Dict[str, schemas.Health] = {}
+    api_status = schemas.HealthStatus.ready
+    dependencies: Dict[str, schemas.Health] = {}
     for api_name, connection in dependency_connections.items():
         dependency_status, status_code = api_client.call(
             connection, "GET", "/health", schemas.Health
         )
-        if api_status == "READY" and (
-            status_code != 200 or dependency_status.status != "READY"
+        if api_status == schemas.HealthStatus.ready and (
+            status_code != 200 or dependency_status.status != schemas.HealthStatus.ready
         ):
-            api_status = "UNAVAILABLE"
+            api_status = schemas.HealthStatus.unavailable
             response.status_code = 503
 
         if status_code == 200:
-            dependency_health[api_name] = dependency_status
+            dependencies[api_name] = dependency_status
         else:
-            dependency_health[api_name] = {"status": "UNAVAILABLE"}
+            dependencies[api_name] = schemas.Health(
+                status=schemas.HealthStatus.unavailable
+            )
 
-    return {"status": "READY", "dependencies": dependency_health}
+    return schemas.Health(status=api_status, dependencies=dependencies)
 
 
 @app.get("/catalog", response_model=List[schemas.Pet], status_code=status.HTTP_200_OK)
@@ -199,7 +207,7 @@ def add_order_item(
             + " not found"
         )
         return schemas.Error(message="Pet with ID " + str(pet_id) + " not found")
-    elif reservation.status == "UNAVAILABLE":
+    elif reservation.status == schemas.HealthStatus.unavailable:
         logger.debug(
             "Creation of order item with ID "
             + str(order_id)

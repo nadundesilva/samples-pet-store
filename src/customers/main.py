@@ -25,7 +25,7 @@ app = FastAPI(root_path="/customers")
 
 @app.get("/health", response_model=schemas.Health, status_code=status.HTTP_200_OK)
 def check_health():
-    return {"status": "UNAVAILABLE"}
+    return schemas.Health(status=schemas.HealthStatus.ready)
 
 
 @app.post(
@@ -38,10 +38,5 @@ def add_pet(
 ) -> schemas.Customer:
     if customer.id is not None:
         return schemas.Error(message="ID for new customers should not be specified")
-    if len(customer.contact_number) != 12:
-        return schemas.Error(
-            message="Invalid length of contact number of customer; expected 12, but received "
-            + str(len(customer.contact_number))
-        )
 
     return crud.create_customer(db, customer=customer)

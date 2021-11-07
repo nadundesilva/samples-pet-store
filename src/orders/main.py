@@ -25,7 +25,7 @@ app = FastAPI(root_path="/orders")
 
 @app.get("/health", response_model=schemas.Health, status_code=status.HTTP_200_OK)
 def check_health():
-    return {"status": "READY"}
+    return schemas.Health(status=schemas.HealthStatus.ready)
 
 
 @app.post(
@@ -59,5 +59,7 @@ def add_order_item(
     if order_item.id is not None:
         return schemas.Error(message="ID for new order items should not be specified")
 
-    order_item.order_id = order_id
+    overriden_order_item = order_item.dict()
+    overriden_order_item["order_id"] = order_id
+    order_item = schemas.OrderItem(**overriden_order_item)
     return crud.create_order_item(db, order_item)

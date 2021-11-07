@@ -14,51 +14,87 @@ limitations under the License.
 """
 
 import datetime
-from typing import Dict, Literal, Optional, Union
+from typing import Dict, Literal, Optional
 from pydantic import BaseModel
+from enum import Enum
+from pydantic.types import conint, constr
 
 
-class Pet(BaseModel):
-    id: Optional[int]
-    display_name: str
-    kind: str
-    current_price: int
-    available_amount: Optional[int]
+class BaseSchema(BaseModel):
+    class Config:
+        frozen = True
+        use_enum_values = True
+        validate_assignment = True
+        anystr_strip_whitespace = True
+        min_anystr_length = 1
 
 
-class Customer(BaseModel):
-    id: Optional[int]
-    first_name: str
-    last_name: str
-    delivery_address: str
-    contact_number: str
+class BaseDataSchema(BaseSchema):
+    class Config:
+        orm_mode = True
 
 
-class Order(BaseModel):
-    id: Optional[int]
-    customer_id: int
+class BaseResponseSchema(BaseSchema):
+    class Config:
+        extra = "forbid"
+
+
+class Pet(BaseDataSchema):
+    id: Optional[conint(strict=True, gt=0)]
+    display_name: constr(strict=True, max_length=255)
+    kind: constr(strict=True, max_length=255, to_lower=True)
+    current_price: conint(strict=True, gt=0)
+    available_amount: Optional[conint(strict=True, ge=0)]
+
+
+class Customer(BaseDataSchema):
+    id: Optional[conint(strict=True, gt=0)]
+    first_name: constr(strict=True, max_length=255)
+    last_name: constr(strict=True, max_length=255)
+    delivery_address: constr(strict=True, max_length=255)
+    contact_number: constr(
+        strict=True, max_length=12, min_length=12, regex="^\+[0-9]{11}$"
+    )
+
+
+class Order(BaseDataSchema):
+    id: Optional[conint(strict=True, gt=0)]
+    customer_id: conint(strict=True, gt=0)
     creation_timestamp: Optional[datetime.datetime]
     payment_timestamp: Optional[datetime.datetime]
 
 
-class OrderItem(BaseModel):
-    id: Optional[int]
-    pet_id: int
-    order_id: Optional[int]
-    amount: int
-    unit_price: int
+class OrderItem(BaseDataSchema):
+    id: Optional[conint(strict=True, gt=0)]
+    pet_id: conint(strict=True, gt=0)
+    order_id: Optional[conint(strict=True, gt=0)]
+    amount: conint(strict=True, gt=0)
+    unit_price: conint(strict=True, gt=0)
 
 
-class Health(BaseModel):
-    status: Union[Literal["READY"], Literal["UNAVAILABLE"]]
-    dependencies: Dict[str, "Health"]
+class HealthStatus(str, Enum):
+    ready = "READY"
+    unavailable = "UNAVAILABLE"
 
 
-class Reservation(BaseModel):
-    status: Union[Literal["RESERVED"], Literal["OUT_OF_STOCK"]]
+class Health(BaseResponseSchema):
+    status: HealthStatus
+    dependencies: Dict[str, "Health"] = {}
+
+
+Health.update_forward_refs()
+
+
+class ReservationStatus(str, Enum):
+    reserved = "RESERVED"
+    out_of_stock = "OUT_OF_STOCK"
+
+
+class Reservation(BaseResponseSchema):
+    status: ReservationStatus
     pet: Pet
 
 
-class Error(BaseModel):
+class Error(BaseResponseSchema):
     status: Literal["ERROR"] = "ERROR"
-    message: str
+    message: constr(strict=True, max_length=255)

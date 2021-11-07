@@ -25,7 +25,7 @@ app = FastAPI(root_path="/pets")
 
 @app.get("/health", response_model=schemas.Health, status_code=status.HTTP_200_OK)
 def check_health():
-    return {"status": "READY"}
+    return schemas.Health(status=schemas.HealthStatus.ready)
 
 
 @app.get("/", response_model=List[schemas.Pet], status_code=status.HTTP_200_OK)
@@ -47,7 +47,12 @@ def reserve_pet(
 ) -> schemas.Pet:
     is_success, pet = crud.reserve_pet(db, pet_id, amount)
     return schemas.Reservation(
-        status=("RESERVED" if is_success else "OUT_OF_STOCK"), pet=pet
+        status=(
+            schemas.ReservationStatus.reserved
+            if is_success
+            else schemas.ReservationStatus.out_of_stock
+        ),
+        pet=pet,
     )
 
 
