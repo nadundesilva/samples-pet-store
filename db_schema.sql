@@ -21,7 +21,7 @@ CREATE TABLE pets (
     id INT UNSIGNED AUTO_INCREMENT,
     display_name VARCHAR(255) NOT NULL,
     kind VARCHAR(255) NOT NULL,
-    current_price INT UNSIGNED NOT NULL,
+    current_price DECIMAL(13, 4) UNSIGNED NOT NULL,
     available_amount INT UNSIGNED NOT NULL DEFAULT 0,
 
     CONSTRAINT pk_id PRIMARY KEY (id),
@@ -53,7 +53,7 @@ CREATE TABLE order_items (
     pet_id INT UNSIGNED NOT NULL,
     order_id INT UNSIGNED NOT NULL,
     amount INT NOT NULL,
-    unit_price INT NOT NULL,
+    unit_price DECIMAL(13, 4) NOT NULL,
 
     CONSTRAINT pk_id PRIMARY KEY (id),
     CONSTRAINT fk_pet_id FOREIGN KEY (pet_id) REFERENCES pets(id),

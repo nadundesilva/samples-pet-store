@@ -31,7 +31,7 @@ def generate() -> List[schemas.Pet]:
             schemas.Pet(
                 display_name="Labrador Retriever",
                 kind="Dog",
-                current_price=1000,
+                current_price=1000.00,
                 available_amount=3,
             )
         ),
@@ -39,7 +39,7 @@ def generate() -> List[schemas.Pet]:
             schemas.Pet(
                 display_name="Golden Retriever",
                 kind="Dog",
-                current_price=1500,
+                current_price=1500.00,
                 available_amount=7,
             )
         ),
@@ -47,7 +47,7 @@ def generate() -> List[schemas.Pet]:
             schemas.Pet(
                 display_name="German Shepherd",
                 kind="Dog",
-                current_price=1400,
+                current_price=1400.00,
                 available_amount=5,
             )
         ),
@@ -55,7 +55,7 @@ def generate() -> List[schemas.Pet]:
             schemas.Pet(
                 display_name="Pembroke Welsh Corgi",
                 kind="Dog",
-                current_price=1600,
+                current_price=1600.00,
                 available_amount=3,
             )
         ),
@@ -63,7 +63,7 @@ def generate() -> List[schemas.Pet]:
             schemas.Pet(
                 display_name="Savannah",
                 kind="Cat",
-                current_price=15000,
+                current_price=15000.00,
                 available_amount=2,
             )
         ),
@@ -71,7 +71,7 @@ def generate() -> List[schemas.Pet]:
             schemas.Pet(
                 display_name="Bengal",
                 kind="Cat",
-                current_price=1300,
+                current_price=1300.00,
                 available_amount=4,
             )
         ),
@@ -79,7 +79,7 @@ def generate() -> List[schemas.Pet]:
             schemas.Pet(
                 display_name="Common Goldfish",
                 kind="Fish",
-                current_price=30,
+                current_price=30.00,
                 available_amount=50,
             )
         ),
@@ -87,7 +87,7 @@ def generate() -> List[schemas.Pet]:
             schemas.Pet(
                 display_name="Corydoras Catfish",
                 kind="Fish",
-                current_price=25,
+                current_price=25.00,
                 available_amount=20,
             )
         ),
@@ -95,7 +95,7 @@ def generate() -> List[schemas.Pet]:
             schemas.Pet(
                 display_name="Syrian Hamster",
                 kind="Hamster",
-                current_price=13,
+                current_price=13.00,
                 available_amount=10,
             )
         ),

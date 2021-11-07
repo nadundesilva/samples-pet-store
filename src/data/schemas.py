@@ -17,7 +17,8 @@ import datetime
 from typing import Dict, Literal, Optional
 from pydantic import BaseModel
 from enum import Enum
-from pydantic.types import conint, constr
+from pydantic.main import Extra
+from pydantic.types import conint, constr, condecimal
 
 
 class BaseSchema(BaseModel):
@@ -36,14 +37,14 @@ class BaseDataSchema(BaseSchema):
 
 class BaseResponseSchema(BaseSchema):
     class Config:
-        extra = "forbid"
+        extra = Extra.forbid
 
 
 class Pet(BaseDataSchema):
     id: Optional[conint(strict=True, gt=0)]
     display_name: constr(strict=True, max_length=255)
     kind: constr(strict=True, max_length=255, to_lower=True)
-    current_price: conint(strict=True, gt=0)
+    current_price: condecimal(gt=0, max_digits=13, decimal_places=4)
     available_amount: Optional[conint(strict=True, ge=0)]
 
 
@@ -69,7 +70,7 @@ class OrderItem(BaseDataSchema):
     pet_id: conint(strict=True, gt=0)
     order_id: Optional[conint(strict=True, gt=0)]
     amount: conint(strict=True, gt=0)
-    unit_price: conint(strict=True, gt=0)
+    unit_price: condecimal(gt=0, max_digits=13, decimal_places=4)
 
 
 class HealthStatus(str, Enum):

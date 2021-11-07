@@ -13,7 +13,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 """
 
-from sqlalchemy import Column, DateTime, ForeignKey, Integer
+from sqlalchemy import Column, DateTime, ForeignKey, Integer, Numeric
 from sqlalchemy.orm import relationship
 from sqlalchemy.sql import func
 from data.database import Base
@@ -49,6 +49,6 @@ class OrderItem(Base):
     pet_id = Column(Integer, ForeignKey("pets.id"))
     order_id = Column(Integer, ForeignKey("orders.id"))
     amount = Column(Integer)
-    unit_price = Column(Integer)
+    unit_price = Column(Numeric)
 
     order = relationship("Order", back_populates="items")

@@ -13,7 +13,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 """
 
-from sqlalchemy import Column, Integer, String
+from sqlalchemy import Column, Integer, String, Numeric
 from data.database import Base
 
 
@@ -23,5 +23,5 @@ class Pet(Base):
     id = Column(Integer, primary_key=True, index=True)
     display_name = Column(String)
     kind = Column(String)
-    current_price = Column(Integer)
+    current_price = Column(Numeric)
     available_amount = Column(Integer, default=0)
