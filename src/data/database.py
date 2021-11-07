@@ -21,7 +21,7 @@ from sqlalchemy.orm import sessionmaker
 __DATABASE_URL = os.getenv("DATABASE_URL", "sqlite:///./sql_app.db")
 
 __connect_args = {}
-if __DATABASE_URL.startswith("sqlite"):
+if __DATABASE_URL.startswith("sqlite://"):
     __connect_args["check_same_thread"] = False
 
 __engine = create_engine(__DATABASE_URL, connect_args=__connect_args)
