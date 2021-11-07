@@ -107,25 +107,33 @@ jobs:
         run: |
           echo "Purging all docker data for the test"
           docker logout ghcr.io
-          docker rm -f $(docker ps -a -q)
           docker rmi -f $(docker images -a -q)
 
           cleanup() {
+            echo
+            echo "Logs of services"
             docker-compose logs
+
+            echo
             echo "Cleaning up containers"
             docker-compose down
           }
           trap cleanup EXIT
 
+          echo
           echo "Starting services"
+          docker-compose pull
           docker-compose up --no-build --force-recreate --renew-anon-volumes --detach
 
+          echo
+          echo "Waiting for the services to startup"
           export DOCKERIZE_VERSION=v0.6.1
           wget https://github.com/jwilder/dockerize/releases/download/${DOCKERIZE_VERSION}/dockerize-linux-amd64-${DOCKERIZE_VERSION}.tar.gz
           tar -C /usr/local/bin -xzvf dockerize-linux-amd64-${DOCKERIZE_VERSION}.tar.gz
           rm dockerize-linux-amd64-${DOCKERIZE_VERSION}.tar.gz
           dockerize -wait http://localhost:8080/health -timeout 2m
 
+          echo
           echo "Testing the health of the services"
           SERVER_OUTPUT=$(curl http://localhost:8080/health | jq -r .status)
           if [ ! "$SERVER_OUTPUT" == "Ready" ]; then

@@ -62,14 +62,16 @@ def check_health(
     dependency_health: Dict[str, HealthStatus] = {}
     for api_name, connection in dependency_connections.items():
         dependency_status, status_code = api_client.call(connection, "GET", "/health")
-        if api_status == "Ready":
+        if api_status == "Ready" and (
+            status_code != 200 or dependency_status["status"] != "Ready"
+        ):
             api_status = "Unavailable"
             response.status_code = 503
 
         if status_code == 200:
             dependency_health[api_name] = dependency_status
         else:
-            dependency_health[api_name] = {"status": "Ready"}
+            dependency_health[api_name] = {"status": "Unavailable"}
 
     return {"status": "Ready", "dependencies": dependency_health}
 
