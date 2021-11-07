@@ -104,6 +104,12 @@ jobs:
           VERSION: latest
       - name: Test Service Startup
         run: |
+          cleanup() {
+            docker-compose logs
+            docker-compose down
+          }
+          trap cleanup EXIT
+
           docker-compose up -d
 
           export DOCKERIZE_VERSION=v0.6.1
