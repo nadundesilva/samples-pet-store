@@ -13,14 +13,15 @@ See the License for the specific language governing permissions and
 limitations under the License.
 """
 
-from sqlalchemy.orm import Session
-from . import db_models as models
-from data import schemas
+from sqlalchemy import Column, Integer, String, Text
+from data.database import Base
 
 
-def create_order(db: Session, order: schemas.Order) -> schemas.Order:
-    db_order = models.Order(customer_id=order.customer_id)
-    db.add(db_order)
-    db.commit()
-    db.refresh(db_order)
-    return schemas.Order(**db_order.__dict__)
+class Customer(Base):
+    __tablename__ = "customers"
+
+    id = Column(Integer, primary_key=True, index=True)
+    first_name = Column(String)
+    last_name = Column(String)
+    delivery_address = Column(Text)
+    contact_number = Column(String)

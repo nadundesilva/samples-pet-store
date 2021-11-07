@@ -15,7 +15,7 @@ limitations under the License.
 
 from typing import List
 from sqlalchemy.orm import Session
-from data.database import models
+from . import db_models as models
 from data import schemas
 
 
