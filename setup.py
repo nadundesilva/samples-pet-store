@@ -48,6 +48,7 @@ setuptools.setup(
         "cryptography ~= 35.0.0",
         "opentelemetry-api ~= " + OTL_VERSION,
         "opentelemetry-sdk ~= " + OTL_VERSION,
+        "opentelemetry-instrumentation-fastapi ~= 0.25b2",
         "opentelemetry-propagator-b3 ~= " + OTL_VERSION,
         "opentelemetry-exporter-otlp ~= " + OTL_VERSION,
     ],

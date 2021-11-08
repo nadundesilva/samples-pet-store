@@ -22,6 +22,7 @@ from typing import Dict, List, Union
 from fastapi import FastAPI
 from data import schemas
 from apis import connections, client as api_client
+from opentelemetry.instrumentation.fastapi import FastAPIInstrumentor
 
 logger = logging.getLogger(__name__)
 
@@ -258,3 +259,6 @@ def add_order_item(
         return schemas.Error(message="Failed to create order item")
 
     return created_order
+
+
+FastAPIInstrumentor.instrument_app(app)
