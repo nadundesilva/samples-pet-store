@@ -13,6 +13,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 """
 
+import httpx
 import telemetry
 from urllib import parse
 from typing import List
@@ -22,11 +23,13 @@ from data import schemas
 logger = telemetry.get_logger(__name__)
 
 
-def __create_order(order: schemas.Order) -> schemas.Order:
-    return call_api("POST", "/orders", schemas.Order, order)
+def __create_order(client: httpx.Client, order: schemas.Order) -> schemas.Order:
+    return call_api(client, "POST", "/orders", schemas.Order, order)
 
 
-def __generate_orders(customers: List[schemas.Customer]) -> List[schemas.Order]:
+def __generate_orders(
+    client: httpx.Client, customers: List[schemas.Customer]
+) -> List[schemas.Order]:
     if len(customers) < 4:
         raise Exception(
             "Unexpected number of customers generated for orders; expected 4, but found "
@@ -35,32 +38,39 @@ def __generate_orders(customers: List[schemas.Customer]) -> List[schemas.Order]:
 
     orders = [
         __create_order(
+            client,
             schemas.Order(
                 customer_id=customers[0].id,
-            )
+            ),
         ),
         __create_order(
+            client,
             schemas.Order(
                 customer_id=customers[1].id,
-            )
+            ),
         ),
         __create_order(
+            client,
             schemas.Order(
                 customer_id=customers[3].id,
-            )
+            ),
         ),
         __create_order(
+            client,
             schemas.Order(
                 customer_id=customers[0].id,
-            )
+            ),
         ),
     ]
     logger.info("Generating " + str(len(orders)) + " sample order(s) completed")
     return orders
 
 
-def __create_order_item(order_id: int, pet_id: int, amount: int) -> schemas.Order:
+def __create_order_item(
+    client: httpx.Client, order_id: int, pet_id: int, amount: int
+) -> schemas.Order:
     return call_api(
+        client,
         "POST",
         "/orders/"
         + parse.quote(str(order_id))
@@ -72,7 +82,9 @@ def __create_order_item(order_id: int, pet_id: int, amount: int) -> schemas.Orde
     )
 
 
-def __generate_orders_items(orders: List[schemas.Order], pets: List[schemas.Pet]):
+def __generate_orders_items(
+    client: httpx.Client, orders: List[schemas.Order], pets: List[schemas.Pet]
+):
     if len(orders) < 4:
         raise Exception(
             "Unexpected number of orders generated; expected 4, but found "
@@ -85,12 +97,12 @@ def __generate_orders_items(orders: List[schemas.Order], pets: List[schemas.Pet]
         )
 
     order_items = [
-        __create_order_item(orders[0].id, pets[0].id, 1),
-        __create_order_item(orders[0].id, pets[6].id, 5),
-        __create_order_item(orders[1].id, pets[1].id, 1),
-        __create_order_item(orders[1].id, pets[8].id, 1),
-        __create_order_item(orders[2].id, pets[1].id, 4),
-        __create_order_item(orders[3].id, pets[1].id, 5),
+        __create_order_item(client, orders[0].id, pets[0].id, 1),
+        __create_order_item(client, orders[0].id, pets[6].id, 5),
+        __create_order_item(client, orders[1].id, pets[1].id, 1),
+        __create_order_item(client, orders[1].id, pets[8].id, 1),
+        __create_order_item(client, orders[2].id, pets[1].id, 4),
+        __create_order_item(client, orders[3].id, pets[1].id, 5),
     ]
     logger.info(
         "Generating " + str(len(order_items)) + " sample order item(s) completed"
@@ -99,8 +111,8 @@ def __generate_orders_items(orders: List[schemas.Order], pets: List[schemas.Pet]
 
 
 def generate(
-    customers: List[schemas.Customer], pets: List[schemas.Pet]
+    client: httpx.Client, customers: List[schemas.Customer], pets: List[schemas.Pet]
 ) -> List[schemas.Order]:
-    orders = __generate_orders(customers)
-    orders_items = __generate_orders_items(orders, pets)
+    orders = __generate_orders(client, customers)
+    orders_items = __generate_orders_items(client, orders, pets)
     return orders, orders_items

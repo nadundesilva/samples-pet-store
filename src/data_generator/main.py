@@ -13,6 +13,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 """
 
+from apis import clients
 import telemetry
 from . import pets, customers, orders
 
@@ -20,8 +21,9 @@ logger = telemetry.get_logger(__name__)
 
 
 def generate_data() -> None:
-    logger.info("Generating sample data started")
-    created_pets = pets.generate()
-    created_customers = customers.generate()
-    orders.generate(created_customers, created_pets)
-    logger.info("Generating sample data completed")
+    with clients.pet_store_api_client_context() as client:
+        logger.info("Generating sample data started")
+        created_pets = pets.generate(client)
+        created_customers = customers.generate(client)
+        orders.generate(client, created_customers, created_pets)
+        logger.info("Generating sample data completed")

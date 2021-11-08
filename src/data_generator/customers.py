@@ -13,6 +13,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 """
 
+import httpx
 import telemetry
 from typing import List
 from .pet_store_api import call as call_api
@@ -21,43 +22,49 @@ from data import schemas
 logger = telemetry.get_logger(__name__)
 
 
-def __create_customer(customer: schemas.Customer) -> schemas.Customer:
-    return call_api("POST", "/customers", schemas.Customer, customer)
+def __create_customer(
+    client: httpx.Client, customer: schemas.Customer
+) -> schemas.Customer:
+    return call_api(client, "POST", "/customers", schemas.Customer, customer)
 
 
-def generate() -> List[schemas.Customer]:
+def generate(client: httpx.Client) -> List[schemas.Customer]:
     customers = [
         __create_customer(
+            client,
             schemas.Customer(
                 first_name="Nadun",
                 last_name="De Silva",
                 delivery_address="T/12/10, Valor Lane, Star City, USA",
                 contact_number="+10019216284",
-            )
+            ),
         ),
         __create_customer(
+            client,
             schemas.Customer(
                 first_name="John",
                 last_name="Doe",
                 delivery_address="X/34/23, Champion Boulevard, West Kirskey, USA",
                 contact_number="+12099216581",
-            )
+            ),
         ),
         __create_customer(
+            client,
             schemas.Customer(
                 first_name="Jane",
                 last_name="Foster",
                 delivery_address="N/12/41, First Lane, East Kirskey, USA",
                 contact_number="+12295236571",
-            )
+            ),
         ),
         __create_customer(
+            client,
             schemas.Customer(
                 first_name="Kyle",
                 last_name="Dex",
                 delivery_address="T/61/4, Second Lane, Smallville, USA",
                 contact_number="+12295236571",
-            )
+            ),
         ),
     ]
     logger.info("Generating " + str(len(customers)) + " sample customer(s) completed")

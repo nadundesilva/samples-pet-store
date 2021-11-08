@@ -18,17 +18,21 @@ import httpx
 from typing import Generator
 
 
-def __get_client(env_api_prefix: str) -> Generator[httpx.Client, None, None]:
+def __create_client_context(env_api_prefix: str) -> httpx.Client:
     base_url = os.getenv(env_api_prefix + "_API_BASE_URL")
-    client = httpx.Client(base_url=base_url)
+    return httpx.Client(base_url=base_url)
+
+
+def __get_client(env_api_prefix: str) -> Generator[httpx.Client, None, None]:
+    client = __create_client_context(env_api_prefix)
     try:
         yield client
     finally:
         client.close()
 
 
-def pet_store_api() -> Generator[httpx.Client, None, None]:
-    yield from __get_client("PET_STORE")
+def pet_store_api_client_context() -> httpx.Client:
+    return __create_client_context("PET_STORE")
 
 
 def pets_api() -> Generator[httpx.Client, None, None]:
