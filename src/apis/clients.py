@@ -16,11 +16,14 @@ limitations under the License.
 import os
 import httpx
 from typing import Generator
+from opentelemetry.instrumentation.httpx import HTTPXClientInstrumentor
 
 
 def __create_client_context(env_api_prefix: str) -> httpx.Client:
     base_url = os.getenv(env_api_prefix + "_API_BASE_URL")
-    return httpx.Client(base_url=base_url)
+    client = httpx.Client(base_url=base_url)
+    HTTPXClientInstrumentor.instrument_client(client)
+    return client
 
 
 def __get_client(env_api_prefix: str) -> Generator[httpx.Client, None, None]:

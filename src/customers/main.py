@@ -19,6 +19,7 @@ from sqlalchemy.orm import Session
 from data.database import db_session
 from data import schemas
 from . import crud
+from opentelemetry.instrumentation.fastapi import FastAPIInstrumentor
 
 app = FastAPI(root_path="/customers")
 
@@ -40,3 +41,6 @@ def add_pet(
         return schemas.Error(message="ID for new customers should not be specified")
 
     return crud.create_customer(db, customer=customer)
+
+
+FastAPIInstrumentor.instrument_app(app)

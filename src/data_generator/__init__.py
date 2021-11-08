@@ -15,4 +15,4 @@ limitations under the License.
 
 import telemetry
 
-telemetry.init("data-generator-api")
+telemetry.init("data-generator")

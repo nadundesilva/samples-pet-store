@@ -20,6 +20,7 @@ from starlette.status import HTTP_200_OK
 from data.database import db_session
 from data import schemas
 from . import crud
+from opentelemetry.instrumentation.fastapi import FastAPIInstrumentor
 
 app = FastAPI(root_path="/orders")
 
@@ -71,3 +72,6 @@ def add_order_item(
     overriden_order_item["order_id"] = order_id
     order_item = schemas.OrderItem(**overriden_order_item)
     return crud.create_order_item(db, order_item)
+
+
+FastAPIInstrumentor.instrument_app(app)
