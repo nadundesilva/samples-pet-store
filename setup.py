@@ -19,6 +19,7 @@ with open("README.md", "r", encoding="utf-8") as fh:
     long_description = fh.read()
 
 OTL_VERSION = "1.6.2"
+OTL_AUTO_INSTRUMENTATION_VERSION = "0.25b2"
 
 setuptools.setup(
     name="pet-store-sample",
@@ -48,7 +49,9 @@ setuptools.setup(
         "cryptography ~= 35.0.0",
         "opentelemetry-api ~= " + OTL_VERSION,
         "opentelemetry-sdk ~= " + OTL_VERSION,
-        "opentelemetry-instrumentation-fastapi ~= 0.25b2",
+        "opentelemetry-instrumentation-fastapi ~= " + OTL_AUTO_INSTRUMENTATION_VERSION,
+        "opentelemetry-instrumentation-sqlalchemy ~= "
+        + OTL_AUTO_INSTRUMENTATION_VERSION,
         "opentelemetry-propagator-b3 ~= " + OTL_VERSION,
         "opentelemetry-exporter-otlp ~= " + OTL_VERSION,
     ],

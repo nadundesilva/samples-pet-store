@@ -17,6 +17,7 @@ import os
 from sqlalchemy import create_engine
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker
+from opentelemetry.instrumentation.sqlalchemy import SQLAlchemyInstrumentor
 
 __DATABASE_URL = os.getenv("DATABASE_URL", "sqlite:///./sql_app.db")
 
@@ -25,6 +26,8 @@ if __DATABASE_URL.startswith("sqlite://"):
     __connect_args["check_same_thread"] = False
 
 __engine = create_engine(__DATABASE_URL, connect_args=__connect_args)
+SQLAlchemyInstrumentor().instrument(engine=__engine)
+
 __SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=__engine)
 
 Base = declarative_base()
