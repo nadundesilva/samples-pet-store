@@ -15,13 +15,13 @@ limitations under the License.
 
 import telemetry
 from urllib import parse
-from http.client import HTTPConnection
+import httpx
 from fastapi import Depends, FastAPI, Query, Response, status
 from fastapi.openapi.utils import get_openapi
 from typing import Dict, List, Union
 from fastapi import FastAPI
 from data import schemas
-from apis import connections, client as api_client
+from apis import clients, call as call_api
 from opentelemetry.instrumentation.fastapi import FastAPIInstrumentor
 
 logger = telemetry.get_logger(__name__)
@@ -49,21 +49,21 @@ app.openapi = __get_open_api_schema
 @app.get("/health", response_model=schemas.Health, status_code=status.HTTP_200_OK)
 def check_health(
     response: Response,
-    pets_api_connection: HTTPConnection = Depends(connections.pets_api),
-    customers_api_connection: HTTPConnection = Depends(connections.customers_api),
-    orders_api_connection: HTTPConnection = Depends(connections.orders_api),
+    pets_api_client: httpx.Client = Depends(clients.pets_api),
+    customers_api_client: httpx.Client = Depends(clients.customers_api),
+    orders_api_client: httpx.Client = Depends(clients.orders_api),
 ) -> schemas.Health:
-    dependency_connections = {
-        "pets-api": pets_api_connection,
-        "customers-api": customers_api_connection,
-        "orders-api": orders_api_connection,
+    dependency_clients = {
+        "pets-api": pets_api_client,
+        "customers-api": customers_api_client,
+        "orders-api": orders_api_client,
     }
 
     api_status = schemas.HealthStatus.ready
     dependencies: Dict[str, schemas.Health] = {}
-    for api_name, connection in dependency_connections.items():
-        dependency_status, status_code = api_client.call(
-            connection, "GET", "/health", schemas.Health
+    for api_name, client in dependency_clients.items():
+        dependency_status, status_code = call_api(
+            client, "GET", "/health", schemas.Health
         )
         if api_status == schemas.HealthStatus.ready and (
             status_code != 200 or dependency_status.status != schemas.HealthStatus.ready
@@ -86,10 +86,10 @@ def get_pets_catalog(
     response: Response,
     limit: int = Query(default=100, lte=100),
     offset: int = 0,
-    pets_api_connection: HTTPConnection = Depends(connections.pets_api),
+    pets_api_client: httpx.Client = Depends(clients.pets_api),
 ) -> List[schemas.Pet]:
-    pets, response.status_code = api_client.call(
-        pets_api_connection,
+    pets, response.status_code = call_api(
+        pets_api_client,
         "GET",
         "/?limit=" + parse.quote(str(limit)) + "&offset=" + parse.quote(str(offset)),
         schemas.Pet,
@@ -102,10 +102,10 @@ def get_pets_catalog(
 def get_all_orders(
     response: Response,
     customer_id: int,
-    orders_api_connection: HTTPConnection = Depends(connections.orders_api),
+    orders_api_client: httpx.Client = Depends(clients.orders_api),
 ) -> List[schemas.Order]:
-    orders, response.status_code = api_client.call(
-        orders_api_connection,
+    orders, response.status_code = call_api(
+        orders_api_client,
         "GET",
         "/?customer_id=" + parse.quote(str(customer_id)),
         schemas.Order,
@@ -120,11 +120,9 @@ def get_all_orders(
 def add_pet(
     response: Response,
     pet: schemas.Pet,
-    pets_api_connection: HTTPConnection = Depends(connections.pets_api),
+    pets_api_client: httpx.Client = Depends(clients.pets_api),
 ) -> schemas.Pet:
-    created_pet, status_code = api_client.call(
-        pets_api_connection, "POST", "/", schemas.Pet, pet
-    )
+    created_pet, status_code = call_api(pets_api_client, "POST", "/", schemas.Pet, pet)
     response.status_code = status_code
     if status_code == 200:
         logger.debug(
@@ -152,10 +150,10 @@ def add_pet(
 def add_customer(
     response: Response,
     customer: schemas.Customer,
-    customers_api_connection: HTTPConnection = Depends(connections.customers_api),
+    customers_api_client: httpx.Client = Depends(clients.customers_api),
 ) -> schemas.Customer:
-    created_customer, status_code = api_client.call(
-        customers_api_connection, "POST", "/", schemas.Customer, customer
+    created_customer, status_code = call_api(
+        customers_api_client, "POST", "/", schemas.Customer, customer
     )
     response.status_code = status_code
     if status_code == 200:
@@ -173,10 +171,10 @@ def add_customer(
 def add_order(
     response: Response,
     order: schemas.Order,
-    orders_api_connection: HTTPConnection = Depends(connections.orders_api),
+    orders_api_client: httpx.Client = Depends(clients.orders_api),
 ) -> schemas.Order:
-    created_order, status_code = api_client.call(
-        orders_api_connection,
+    created_order, status_code = call_api(
+        orders_api_client,
         "POST",
         "/",
         schemas.Order,
@@ -204,11 +202,11 @@ def add_order_item(
     order_id: int,
     pet_id: int,
     amount: int = Query(default=1, gt=0),
-    pets_api_connection: HTTPConnection = Depends(connections.pets_api),
-    orders_api_connection: HTTPConnection = Depends(connections.orders_api),
+    pets_api_client: httpx.Client = Depends(clients.pets_api),
+    orders_api_client: httpx.Client = Depends(clients.orders_api),
 ) -> schemas.Order:
-    reservation, status_code = api_client.call(
-        pets_api_connection,
+    reservation, status_code = call_api(
+        pets_api_client,
         "PATCH",
         "/"
         + parse.quote(str(pet_id))
@@ -242,8 +240,8 @@ def add_order_item(
         amount=amount,
         unit_price=reservation.pet.current_price,
     )
-    created_order, status_code = api_client.call(
-        orders_api_connection,
+    created_order, status_code = call_api(
+        orders_api_client,
         "POST",
         "/" + parse.quote(str(order_id)) + "/items",
         schemas.OrderItem,

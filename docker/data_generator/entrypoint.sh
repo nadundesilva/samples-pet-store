@@ -15,5 +15,5 @@
 
 set -eo pipefail
 
-dockerize -wait tcp://${PET_STORE_API_HOST}:${PET_STORE_API_PORT} --timeout 1m
+dockerize -wait ${PET_STORE_API_TCP_ADDRESS} --timeout 1m
 python -c 'from data_generator.main import generate_data; generate_data();'

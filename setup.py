@@ -47,6 +47,7 @@ setuptools.setup(
         "SQLAlchemy ~= 1.4.26",
         "PyMySQL ~= 1.0.2",
         "cryptography ~= 35.0.0",
+        "httpx ~= 0.20.0",
         "opentelemetry-api ~= " + OTEL_VERSION,
         "opentelemetry-sdk ~= " + OTEL_VERSION,
         "opentelemetry-instrumentation-fastapi ~= " + OTEL_AUTO_INST_VERSION,

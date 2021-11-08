@@ -13,25 +13,25 @@ See the License for the specific language governing permissions and
 limitations under the License.
 """
 
+import os
+import httpx
 from typing import Type
-from apis import connections, client as api_client
+from apis import call as call_api
 from pydantic import BaseModel
 
 
 def call(
     method: str, url: str, model_type: Type[BaseModel], body: BaseModel = None
 ) -> BaseModel:
-    connection = next(connections.pet_store_api())
-    response_body, status_code = api_client.call(
-        connection, method, url, model_type, body
-    )
-    if status_code != 200:
-        raise Exception(
-            "Failed to call Pet Store API with status code "
-            + str(status_code)
-            + " for "
-            + method
-            + " "
-            + url
-        )
-    return response_body
+    with httpx.Client(base_url=os.getenv("PET_STORE_API_BASE_URL")) as client:
+        response_body, status_code = call_api(client, method, url, model_type, body)
+        if status_code != 200:
+            raise Exception(
+                "Failed to call Pet Store API with status code "
+                + str(status_code)
+                + " for "
+                + method
+                + " "
+                + url
+            )
+        return response_body

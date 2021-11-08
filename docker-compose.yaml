@@ -12,8 +12,8 @@ services:
     - pet-store-api
     environment:
     - OTEL_PYTHON_LOG_LEVEL=DEBUG
-    - PET_STORE_API_HOST=pet-store-api
-    - PET_STORE_API_PORT=8080
+    - PET_STORE_API_TCP_ADDRESS=tcp://pet-store-api:8080
+    - PET_STORE_API_BASE_URL=http://pet-store-api:8080
     - OTEL_EXPORTER_OTLP_TRACES_ENDPOINT=http://jaeger:55680
 
   pet-store-api:
@@ -34,12 +34,9 @@ services:
     - PET_STORE_PACKAGE=pet_store
     - WAIT_FOR=tcp://pets-api:8080,tcp://customers-api:8080,tcp://orders-api:8080
     - OTEL_PYTHON_LOG_LEVEL=DEBUG
-    - PETS_API_HOST=pets-api
-    - PETS_API_PORT=8080
-    - CUSTOMERS_API_HOST=customers-api
-    - CUSTOMERS_API_PORT=8080
-    - ORDERS_API_HOST=orders-api
-    - ORDERS_API_PORT=8080
+    - PETS_API_BASE_URL=http://pets-api:8080
+    - CUSTOMERS_API_BASE_URL=http://customers-api:8080
+    - ORDERS_API_BASE_URL=http://orders-api:8080
     - OTEL_EXPORTER_OTLP_TRACES_ENDPOINT=http://jaeger:55680
 
   pets-api:
