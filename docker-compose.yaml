@@ -14,6 +14,7 @@ services:
     - LOG_LEVEL=DEBUG
     - PET_STORE_API_HOST=pet-store-api
     - PET_STORE_API_PORT=8080
+    - OTEL_EXPORTER_OTLP_TRACES_ENDPOINT=http://jaeger:55680
 
   pet-store-api:
     image: ghcr.io/nadundesilva/samples/pet-store/main:${VERSION}
@@ -39,6 +40,7 @@ services:
     - CUSTOMERS_API_PORT=8080
     - ORDERS_API_HOST=orders-api
     - ORDERS_API_PORT=8080
+    - OTEL_EXPORTER_OTLP_TRACES_ENDPOINT=http://jaeger:55680
 
   pets-api:
     image: ghcr.io/nadundesilva/samples/pet-store/main:${VERSION}
@@ -57,6 +59,7 @@ services:
     - WAIT_FOR=tcp://database:3306
     - LOG_LEVEL=DEBUG
     - DATABASE_URL=mysql+pymysql://pet-store-user:pet-store-user-password@database:3306/pet_store
+    - OTEL_EXPORTER_OTLP_TRACES_ENDPOINT=http://jaeger:55680
 
   customers-api:
     image: ghcr.io/nadundesilva/samples/pet-store/main:${VERSION}
@@ -75,6 +78,7 @@ services:
     - WAIT_FOR=tcp://database:3306
     - LOG_LEVEL=DEBUG
     - DATABASE_URL=mysql+pymysql://pet-store-user:pet-store-user-password@database:3306/pet_store
+    - OTEL_EXPORTER_OTLP_TRACES_ENDPOINT=http://jaeger:55680
 
   orders-api:
     image: ghcr.io/nadundesilva/samples/pet-store/main:${VERSION}
@@ -93,6 +97,7 @@ services:
     - WAIT_FOR=tcp://database:3306
     - LOG_LEVEL=DEBUG
     - DATABASE_URL=mysql+pymysql://pet-store-user:pet-store-user-password@database:3306/pet_store
+    - OTEL_EXPORTER_OTLP_TRACES_ENDPOINT=http://jaeger:55680
 
   database:
     image: mysql:8.0.27

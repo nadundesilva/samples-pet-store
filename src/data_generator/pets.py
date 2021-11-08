@@ -13,12 +13,12 @@ See the License for the specific language governing permissions and
 limitations under the License.
 """
 
-import logging
+import telemetry
 from typing import List
 from .pet_store_api import call as call_api
 from data import schemas
 
-logger = logging.getLogger(__name__)
+logger = telemetry.get_logger(__name__)
 
 
 def __create_pet(pet: schemas.Pet) -> schemas.Pet:

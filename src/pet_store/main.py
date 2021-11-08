@@ -13,7 +13,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 """
 
-import logging
+import telemetry
 from urllib import parse
 from http.client import HTTPConnection
 from fastapi import Depends, FastAPI, Query, Response, status
@@ -24,7 +24,7 @@ from data import schemas
 from apis import connections, client as api_client
 from opentelemetry.instrumentation.fastapi import FastAPIInstrumentor
 
-logger = logging.getLogger(__name__)
+logger = telemetry.get_logger(__name__)
 
 app = FastAPI()
 

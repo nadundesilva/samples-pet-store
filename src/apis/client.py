@@ -14,12 +14,12 @@ limitations under the License.
 """
 
 import json
-import logging
+import telemetry
 from http.client import HTTPConnection
 from typing import Tuple, Type
 from pydantic import BaseModel
 
-logger = logging.getLogger(__name__)
+logger = telemetry.get_logger(__name__)
 
 
 def call(

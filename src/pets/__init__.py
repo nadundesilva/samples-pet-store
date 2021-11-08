@@ -13,8 +13,6 @@ See the License for the specific language governing permissions and
 limitations under the License.
 """
 
-import logging
-import os
+import telemetry
 
-LOG_LEVEL = os.environ.get("LOG_LEVEL", "DEBUG").upper()
-logging.basicConfig(level=LOG_LEVEL)
+telemetry.init("pets-api")
