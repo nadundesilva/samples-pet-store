@@ -18,8 +18,8 @@ import setuptools
 with open("README.md", "r", encoding="utf-8") as fh:
     long_description = fh.read()
 
-OTL_VERSION = "1.6.2"
-OTL_AUTO_INSTRUMENTATION_VERSION = "0.25b2"
+OTEL_VERSION = "1.6.2"
+OTEL_AUTO_INST_VERSION = "0.25b2"
 
 setuptools.setup(
     name="pet-store-sample",
@@ -47,13 +47,13 @@ setuptools.setup(
         "SQLAlchemy ~= 1.4.26",
         "PyMySQL ~= 1.0.2",
         "cryptography ~= 35.0.0",
-        "opentelemetry-api ~= " + OTL_VERSION,
-        "opentelemetry-sdk ~= " + OTL_VERSION,
-        "opentelemetry-instrumentation-fastapi ~= " + OTL_AUTO_INSTRUMENTATION_VERSION,
-        "opentelemetry-instrumentation-sqlalchemy ~= "
-        + OTL_AUTO_INSTRUMENTATION_VERSION,
-        "opentelemetry-propagator-b3 ~= " + OTL_VERSION,
-        "opentelemetry-exporter-otlp ~= " + OTL_VERSION,
+        "opentelemetry-api ~= " + OTEL_VERSION,
+        "opentelemetry-sdk ~= " + OTEL_VERSION,
+        "opentelemetry-instrumentation-fastapi ~= " + OTEL_AUTO_INST_VERSION,
+        "opentelemetry-instrumentation-sqlalchemy ~= " + OTEL_AUTO_INST_VERSION,
+        "opentelemetry-instrumentation-logging ~= " + OTEL_AUTO_INST_VERSION,
+        "opentelemetry-propagator-b3 ~= " + OTEL_VERSION,
+        "opentelemetry-exporter-otlp ~= " + OTEL_VERSION,
     ],
     tests_require=["pytest ~= 6.2.3", "coverage ~= 5.5"],
     extras_require={"dev": ["black ~= 20.8b1"], "prod": ["uvicorn==0.15.0"]},

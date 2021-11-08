@@ -20,6 +20,7 @@ from opentelemetry.sdk.resources import Resource
 from opentelemetry.sdk.trace import TracerProvider
 from opentelemetry.exporter.otlp.proto.grpc.trace_exporter import OTLPSpanExporter
 from opentelemetry.sdk.trace.export import BatchSpanProcessor
+from opentelemetry.instrumentation.logging import LoggingInstrumentor
 
 
 def init(service_name: str):
@@ -37,8 +38,7 @@ def __init_tracing(service_name: str):
 
 
 def __init_logging():
-    LOG_LEVEL = os.environ.get("LOG_LEVEL", "DEBUG").upper()
-    logging.basicConfig(level=LOG_LEVEL)
+    LoggingInstrumentor().instrument(set_logging_format=True)
 
 
 def get_logger(name):
