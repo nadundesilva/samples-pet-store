@@ -13,7 +13,17 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+set +e
+
+echo "{\"message\": \"Waiting for dependency ${PET_STORE_API_TCP_ADDRESS}\"}"
+dockerize -wait ${PET_STORE_API_TCP_ADDRESS} --timeout 1m &> /dev/null
+if [[ "${?}" != "0" ]]; then
+    echo "{\"message\": \"Waiting for dependency ${PET_STORE_API_TCP_ADDRESS} timed out\"}"
+    exit 1
+else
+    echo "{\"message\": \"Dependency ${PET_STORE_API_TCP_ADDRESS} ready\"}"
+fi
+
 set -eo pipefail
 
-dockerize -wait ${PET_STORE_API_TCP_ADDRESS} --timeout 1m
 python -c 'from data_generator.main import generate_data; generate_data();'

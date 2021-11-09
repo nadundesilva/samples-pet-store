@@ -48,6 +48,7 @@ setuptools.setup(
         "PyMySQL ~= 1.0.2",
         "cryptography ~= 35.0.0",
         "httpx ~= 0.18.0",
+        "python-json-logger ~= 2.0.2",
         "opentelemetry-api ~= " + OTEL_VERSION,
         "opentelemetry-sdk ~= " + OTEL_VERSION,
         "opentelemetry-instrumentation-fastapi ~= " + OTEL_AUTO_INST_VERSION,

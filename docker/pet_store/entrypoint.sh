@@ -13,12 +13,25 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-set -eo pipefail
+set +e
 
 IFS=',' read -r -a dependencies <<< "${WAIT_FOR}"
 for dependency in "${dependencies[@]}"
 do
-   dockerize -wait "${dependency}" --timeout 1m
+   echo "{\"message\": \"Waiting for dependency ${dependency}\"}"
+   dockerize -wait "${dependency}" --timeout 1m &> /dev/null
+   if [[ "${?}" != "0" ]]; then
+      echo "{\"message\": \"Waiting for dependency ${dependency} timed out\"}"
+      exit 1
+   else
+      echo "{\"message\": \"Dependency ${dependency} ready\"}"
+   fi
 done
 
-uvicorn ${PET_STORE_PACKAGE}.main:app --host 0.0.0.0 --port 8080 --header server:pet-store-server
+set -eo pipefail
+
+uvicorn ${PET_STORE_PACKAGE}.main:app \
+   --host 0.0.0.0 \
+   --port 8080 \
+   --header server:pet-store-server \
+   --no-use-colors

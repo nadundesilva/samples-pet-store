@@ -13,13 +13,19 @@ See the License for the specific language governing permissions and
 limitations under the License.
 """
 
+import os
 import logging
 from opentelemetry import trace
 from opentelemetry.sdk.resources import Resource
 from opentelemetry.sdk.trace import TracerProvider
 from opentelemetry.exporter.otlp.proto.grpc.trace_exporter import OTLPSpanExporter
 from opentelemetry.sdk.trace.export import BatchSpanProcessor
-from opentelemetry.instrumentation.logging import LoggingInstrumentor
+from opentelemetry.instrumentation.logging import (
+    LEVELS,
+    LoggingInstrumentor,
+    environment_variables,
+)
+from pythonjsonlogger.jsonlogger import JsonFormatter
 
 
 def init(service_name: str):
@@ -37,7 +43,22 @@ def __init_tracing(service_name: str):
 
 
 def __init_logging():
-    LoggingInstrumentor().instrument(set_logging_format=True)
+    LoggingInstrumentor().instrument(set_logging_format=False)
+
+    handler = logging.StreamHandler()
+    handler.setFormatter(JsonFormatter())
+    log_level = LEVELS.get(os.environ.get(environment_variables.OTEL_PYTHON_LOG_LEVEL))
+    logging.basicConfig(level=log_level, handlers=[handler], force=True)
+
+    for name in [
+        *logging.root.manager.loggerDict.keys(),
+        "uvicorn",
+        "uvicorn.access",
+        "uvicorn.error",
+    ]:
+        logger = logging.getLogger(name)
+        logger.handlers = [handler]
+        logger.propagate = False
 
 
 def get_logger(name):
