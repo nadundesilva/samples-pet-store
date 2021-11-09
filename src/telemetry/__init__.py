@@ -14,7 +14,6 @@ limitations under the License.
 """
 
 import logging
-import os
 from opentelemetry import trace
 from opentelemetry.sdk.resources import Resource
 from opentelemetry.sdk.trace import TracerProvider

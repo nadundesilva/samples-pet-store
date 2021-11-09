@@ -18,12 +18,21 @@ import telemetry
 from . import pets, customers, orders
 
 logger = telemetry.get_logger(__name__)
+tracer = telemetry.get_tracer(__name__)
 
 
 def generate_data() -> None:
-    with clients.pet_store_api_client_context() as client:
-        logger.info("Generating sample data started")
-        created_pets = pets.generate(client)
-        created_customers = customers.generate(client)
-        orders.generate(client, created_customers, created_pets)
-        logger.info("Generating sample data completed")
+    with tracer.start_as_current_span("generate data") as span:
+        with clients.pet_store_api_client_context() as client:
+            logger.info("Generating sample data started")
+
+            created_pets = pets.generate(client)
+            span.set_attribute("gen.pets_count", len(created_pets))
+
+            created_customers = customers.generate(client)
+            span.set_attribute("gen.customers_count", len(created_customers))
+
+            created_orders = orders.generate(client, created_customers, created_pets)
+            span.set_attribute("gen.orders_count", len(created_orders))
+
+            logger.info("Generating sample data completed")
