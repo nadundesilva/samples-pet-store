@@ -58,5 +58,8 @@ setuptools.setup(
         "opentelemetry-exporter-otlp ~= " + OTEL_VERSION,
     ],
     tests_require=["pytest ~= 6.2.3", "coverage ~= 5.5"],
-    extras_require={"dev": ["black ~= 20.8b1"], "prod": ["uvicorn==0.15.0"]},
+    extras_require={
+        "dev": ["black ~= 20.8b1"],
+        "prod": ["uvicorn==0.15.0", "gunicorn ~= 20.1.0"],
+    },
 )
