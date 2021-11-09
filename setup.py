@@ -56,7 +56,7 @@ setuptools.setup(
         "opentelemetry-instrumentation-logging ~= " + OTEL_AUTO_INST_VERSION,
         "opentelemetry-instrumentation-httpx ~= " + OTEL_AUTO_INST_VERSION,
         "opentelemetry-propagator-b3 ~= " + OTEL_VERSION,
-        "opentelemetry-exporter-otlp ~= " + OTEL_VERSION,
+        "opentelemetry-exporter-otlp-proto-grpc ~= " + OTEL_VERSION,
     ],
     tests_require=["pytest ~= 6.2.3", "coverage ~= 5.5"],
     extras_require={

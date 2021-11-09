@@ -10,11 +10,12 @@ services:
     - ALL
     depends_on:
     - pet-store-api
+    - otel-collector
     environment:
     - OTEL_PYTHON_LOG_LEVEL=DEBUG
     - PET_STORE_API_TCP_ADDRESS=tcp://pet-store-api:8080
     - PET_STORE_API_BASE_URL=http://pet-store-api:8080
-    - OTEL_EXPORTER_OTLP_TRACES_ENDPOINT=http://jaeger:55680
+    - OTEL_EXPORTER_OTLP_ENDPOINT=http://otel-collector:4317
 
   pet-store-api:
     image: ghcr.io/nadundesilva/samples/pet-store/main:${VERSION}
@@ -29,7 +30,7 @@ services:
     - pets-api
     - customers-api
     - orders-api
-    - jaeger
+    - otel-collector
     environment:
     - PET_STORE_PACKAGE=pet_store
     - WAIT_FOR=tcp://pets-api:8080,tcp://customers-api:8080,tcp://orders-api:8080
@@ -37,7 +38,7 @@ services:
     - PETS_API_BASE_URL=http://pets-api:8080
     - CUSTOMERS_API_BASE_URL=http://customers-api:8080
     - ORDERS_API_BASE_URL=http://orders-api:8080
-    - OTEL_EXPORTER_OTLP_TRACES_ENDPOINT=http://jaeger:55680
+    - OTEL_EXPORTER_OTLP_ENDPOINT=http://otel-collector:4317
 
   pets-api:
     image: ghcr.io/nadundesilva/samples/pet-store/main:${VERSION}
@@ -50,13 +51,13 @@ services:
     - "8080"
     depends_on:
     - database
-    - jaeger
+    - otel-collector
     environment:
     - PET_STORE_PACKAGE=pets
     - WAIT_FOR=tcp://database:3306
     - OTEL_PYTHON_LOG_LEVEL=DEBUG
     - DATABASE_URL=mysql+pymysql://pet-store-user:pet-store-user-password@database:3306/pet_store
-    - OTEL_EXPORTER_OTLP_TRACES_ENDPOINT=http://jaeger:55680
+    - OTEL_EXPORTER_OTLP_ENDPOINT=http://otel-collector:4317
 
   customers-api:
     image: ghcr.io/nadundesilva/samples/pet-store/main:${VERSION}
@@ -69,13 +70,13 @@ services:
     - "8080"
     depends_on:
     - database
-    - jaeger
+    - otel-collector
     environment:
     - PET_STORE_PACKAGE=customers
     - WAIT_FOR=tcp://database:3306
     - OTEL_PYTHON_LOG_LEVEL=DEBUG
     - DATABASE_URL=mysql+pymysql://pet-store-user:pet-store-user-password@database:3306/pet_store
-    - OTEL_EXPORTER_OTLP_TRACES_ENDPOINT=http://jaeger:55680
+    - OTEL_EXPORTER_OTLP_ENDPOINT=http://otel-collector:4317
 
   orders-api:
     image: ghcr.io/nadundesilva/samples/pet-store/main:${VERSION}
@@ -88,13 +89,13 @@ services:
     - "8080"
     depends_on:
     - database
-    - jaeger
+    - otel-collector
     environment:
     - PET_STORE_PACKAGE=orders
     - WAIT_FOR=tcp://database:3306
     - OTEL_PYTHON_LOG_LEVEL=DEBUG
     - DATABASE_URL=mysql+pymysql://pet-store-user:pet-store-user-password@database:3306/pet_store
-    - OTEL_EXPORTER_OTLP_TRACES_ENDPOINT=http://jaeger:55680
+    - OTEL_EXPORTER_OTLP_ENDPOINT=http://otel-collector:4317
 
   database:
     image: mysql:8.0.27
@@ -108,8 +109,18 @@ services:
     - MYSQL_PASSWORD=pet-store-user-password
     - MYSQL_DATABASE=pet_store
 
-  jaeger:
-    image: jaegertracing/opentelemetry-all-in-one:latest
+  otel-collector:
+    image: otel/opentelemetry-collector:0.38.0
+    command: ["otelcol", "--config", "/otel-config.yaml"]
     ports:
-    - "55680"
+    - "4317:4317"
+    depends_on:
+    - jaeger
+    volumes:
+    - "${PWD}/otel-config.yaml:/otel-config.yaml"
+
+  jaeger:
+    image: jaegertracing/all-in-one:1.28
+    ports:
+    - "14250"
     - "16686:16686"
