@@ -15,13 +15,19 @@
 
 set +e
 
-echo "{\"message\": \"Waiting for dependency ${PET_STORE_API_TCP_ADDRESS}\"}"
+function log() {
+   LOG_LEVEL=${1}
+   MESSAGE=${2}
+   echo "{\"timestamp\": \"$(date '+%Y-%m-%dT%H:%M:%SZ%:::z')\", \"levelname\": \"${LOG_LEVEL}\", \"pathname\": \"/app/entrypoint.sh\", \"message\": \"${MESSAGE}\"}"
+}
+
+log "INFO" "Waiting for dependency ${PET_STORE_API_TCP_ADDRESS}"
 dockerize -wait ${PET_STORE_API_TCP_ADDRESS} --timeout 1m &> /dev/null
 if [[ "${?}" != "0" ]]; then
-    echo "{\"message\": \"Waiting for dependency ${PET_STORE_API_TCP_ADDRESS} timed out\"}"
+    log "ERROR" "Waiting for dependency ${PET_STORE_API_TCP_ADDRESS} timed out"
     exit 1
 else
-    echo "{\"message\": \"Dependency ${PET_STORE_API_TCP_ADDRESS} ready\"}"
+    log "INFO" "Dependency ${PET_STORE_API_TCP_ADDRESS} ready"
 fi
 
 set -eo pipefail

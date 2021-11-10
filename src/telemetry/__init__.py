@@ -14,6 +14,7 @@ limitations under the License.
 """
 
 import os
+from datetime import datetime
 import logging
 from opentelemetry import trace
 from opentelemetry.sdk.resources import Resource
@@ -26,6 +27,24 @@ from opentelemetry.instrumentation.logging import (
     environment_variables,
 )
 from pythonjsonlogger.jsonlogger import JsonFormatter
+
+LOGGING_FORMAT = (
+    "%(timestamp)s %(levelname)s %(name)s %(processName)s %(threadName)s "
+    + "%(pathname)s %(lineno)d %(message)s %(otelTraceID)s %(otelSpanID)s "
+    + "%(otelServiceName)s"
+)
+
+
+class CustomJsonFormatter(JsonFormatter):
+    def add_fields(self, log_record, record, message_dict):
+        super(CustomJsonFormatter, self).add_fields(log_record, record, message_dict)
+        if not log_record.get("timestamp"):
+            now = datetime.now().strftime("%Y-%m-%dT%H:%M:%S.%fZ")
+            log_record["timestamp"] = now
+        if log_record.get("level"):
+            record.levelname = log_record["level"]
+        else:
+            record.levelname = record.levelname.upper()
 
 
 def init(service_name: str):
@@ -46,7 +65,8 @@ def __init_logging():
     LoggingInstrumentor().instrument(set_logging_format=False)
 
     handler = logging.StreamHandler()
-    handler.setFormatter(JsonFormatter())
+    handler.setFormatter(CustomJsonFormatter(LOGGING_FORMAT))
+
     log_level = LEVELS.get(os.environ.get(environment_variables.OTEL_PYTHON_LOG_LEVEL))
     logging.basicConfig(level=log_level, handlers=[handler], force=True)
 

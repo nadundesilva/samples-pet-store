@@ -15,16 +15,22 @@
 
 set +e
 
+function log() {
+   LOG_LEVEL=${1}
+   MESSAGE=${2}
+   echo "{\"timestamp\": \"$(date '+%Y-%m-%dT%H:%M:%SZ%:::z')\", \"levelname\": \"${LOG_LEVEL}\", \"pathname\": \"/app/entrypoint.sh\", \"message\": \"${MESSAGE}\"}"
+}
+
 IFS=',' read -r -a dependencies <<< "${WAIT_FOR}"
 for dependency in "${dependencies[@]}"
 do
-   echo "{\"message\": \"Waiting for dependency ${dependency}\"}"
+   log "INFO" "Waiting for dependency ${dependency}"
    dockerize -wait "${dependency}" --timeout 1m &> /dev/null
    if [[ "${?}" != "0" ]]; then
-      echo "{\"message\": \"Waiting for dependency ${dependency} timed out\"}"
+      log "ERROR" "Waiting for dependency ${dependency} timed out"
       exit 1
    else
-      echo "{\"message\": \"Dependency ${dependency} ready\"}"
+      log "INFO" "Dependency ${dependency} ready"
    fi
 done
 

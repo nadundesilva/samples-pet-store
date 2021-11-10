@@ -111,13 +111,13 @@ services:
 
   otel-collector:
     image: otel/opentelemetry-collector:0.38.0
-    command: ["otelcol", "--config", "/otel-config.yaml"]
+    command: ["otelcol", "--config", "/etc/otel-collector/otel-config.yaml"]
     ports:
     - "4317:4317"
     depends_on:
     - jaeger
     volumes:
-    - "${PWD}/otel-config.yaml:/otel-config.yaml"
+    - "${PWD}/otel-config.yaml:/etc/otel-collector/otel-config.yaml"
 
   jaeger:
     image: jaegertracing/all-in-one:1.28
