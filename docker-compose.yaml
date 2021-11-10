@@ -2,7 +2,7 @@ version: "3.3"
 
 services:
   data-generator:
-    image: ghcr.io/nadundesilva/samples/pet-store/data-generator:${VERSION}
+    image: ghcr.io/nadundesilva/samples/pet-store/data-generator:${VERSION:-latest}
     build:
       context: .
       dockerfile: ./docker/data_generator/Dockerfile
@@ -18,7 +18,7 @@ services:
     - OTEL_EXPORTER_OTLP_ENDPOINT=http://otel-collector:4317
 
   pet-store-api:
-    image: ghcr.io/nadundesilva/samples/pet-store/main:${VERSION}
+    image: ghcr.io/nadundesilva/samples/pet-store/main:${VERSION:-latest}
     build:
       context: .
       dockerfile: ./docker/pet_store/Dockerfile
@@ -41,7 +41,7 @@ services:
     - OTEL_EXPORTER_OTLP_ENDPOINT=http://otel-collector:4317
 
   pets-api:
-    image: ghcr.io/nadundesilva/samples/pet-store/main:${VERSION}
+    image: ghcr.io/nadundesilva/samples/pet-store/main:${VERSION:-latest}
     build:
       context: .
       dockerfile: ./docker/pet_store/Dockerfile
@@ -60,7 +60,7 @@ services:
     - OTEL_EXPORTER_OTLP_ENDPOINT=http://otel-collector:4317
 
   customers-api:
-    image: ghcr.io/nadundesilva/samples/pet-store/main:${VERSION}
+    image: ghcr.io/nadundesilva/samples/pet-store/main:${VERSION:-latest}
     build:
       context: .
       dockerfile: ./docker/pet_store/Dockerfile
@@ -79,7 +79,7 @@ services:
     - OTEL_EXPORTER_OTLP_ENDPOINT=http://otel-collector:4317
 
   orders-api:
-    image: ghcr.io/nadundesilva/samples/pet-store/main:${VERSION}
+    image: ghcr.io/nadundesilva/samples/pet-store/main:${VERSION:-latest}
     build:
       context: .
       dockerfile: ./docker/pet_store/Dockerfile
