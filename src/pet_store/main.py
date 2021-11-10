@@ -23,6 +23,7 @@ from fastapi import FastAPI
 from data import schemas
 from apis import clients, call as call_api
 from opentelemetry.instrumentation.fastapi import FastAPIInstrumentor
+from opentelemetry import trace
 
 logger = telemetry.get_logger(__name__)
 
@@ -104,6 +105,7 @@ def get_all_orders(
     customer_id: int,
     orders_api_client: httpx.Client = Depends(clients.orders_api),
 ) -> List[schemas.Order]:
+    trace.get_current_span().set_attribute("pet_store.customer_id", customer_id)
     orders, response.status_code = call_api(
         orders_api_client,
         "GET",
@@ -125,6 +127,7 @@ def add_pet(
     created_pet, status_code = call_api(pets_api_client, "POST", "/", schemas.Pet, pet)
     response.status_code = status_code
     if status_code == 200:
+        trace.get_current_span().set_attribute("pet_store.pet_id", created_pet.id)
         logger.debug(
             "Created a new pet "
             + created_pet.display_name
@@ -157,6 +160,9 @@ def add_customer(
     )
     response.status_code = status_code
     if status_code == 200:
+        trace.get_current_span().set_attribute(
+            "pet_store.customer_id", created_customer.id
+        )
         logger.debug("Created a new customer with ID " + str(created_customer.id))
     else:
         logger.error(
@@ -182,6 +188,7 @@ def add_order(
     )
     response.status_code = status_code
     if status_code == 200:
+        trace.get_current_span().set_attribute("pet_store.order_id", created_order.id)
         logger.debug("Created a new order with ID " + str(created_order.id))
     else:
         logger.error(
@@ -205,6 +212,7 @@ def add_order_item(
     pets_api_client: httpx.Client = Depends(clients.pets_api),
     orders_api_client: httpx.Client = Depends(clients.orders_api),
 ) -> schemas.Order:
+    trace.get_current_span().set_attribute("pet_store.order_id", order_id)
     reservation, status_code = call_api(
         pets_api_client,
         "PATCH",
@@ -216,6 +224,9 @@ def add_order_item(
     )
     response.status_code = status_code
     if status_code != 200:
+        trace.get_current_span().set_attribute(
+            "pet_store.reservation_status", reservation.status
+        )
         logger.debug(
             "Creation of order item with ID "
             + str(order_id)
@@ -240,7 +251,7 @@ def add_order_item(
         amount=amount,
         unit_price=reservation.pet.current_price,
     )
-    created_order, status_code = call_api(
+    created_order_item, status_code = call_api(
         orders_api_client,
         "POST",
         "/" + parse.quote(str(order_id)) + "/items",
@@ -249,14 +260,17 @@ def add_order_item(
     )
     response.status_code = status_code
     if status_code == 200:
-        logger.debug("Created a new order with ID " + str(created_order.id))
+        trace.get_current_span().set_attribute(
+            "pet_store.order_item_id", created_order_item.id
+        )
+        logger.debug("Created a new order with ID " + str(created_order_item.id))
     else:
         logger.error(
             "Failed to create a new order with status code " + str(status_code)
         )
         return schemas.Error(message="Failed to create order item")
 
-    return created_order
+    return created_order_item
 
 
 FastAPIInstrumentor.instrument_app(app)
