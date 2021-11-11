@@ -103,6 +103,21 @@ jobs:
           docker-compose push
         env:
           VERSION: latest
+
+  test-pet-store:
+    name: Test Pet Store
+    runs-on: ubuntu-20.04
+    needs: build
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v2
+      - name: Setup Dockerize
+        run: |
+          wget https://github.com/jwilder/dockerize/releases/download/${DOCKERIZE_VERSION}/dockerize-linux-amd64-${DOCKERIZE_VERSION}.tar.gz
+          tar -C /usr/local/bin -xzvf dockerize-linux-amd64-${DOCKERIZE_VERSION}.tar.gz
+          rm dockerize-linux-amd64-${DOCKERIZE_VERSION}.tar.gz
+        env:
+          DOCKERIZE_VERSION: v0.6.1
       - name: Test Service Startup
         run: |
           echo "Purging all docker data for the test"
@@ -115,7 +130,7 @@ jobs:
             docker-compose logs
 
             echo
-            echo "Cleaning up containers"
+            echo "Cleaning up containers of services"
             docker-compose down
           }
           trap cleanup EXIT
@@ -123,15 +138,76 @@ jobs:
           echo
           echo "Starting services"
           docker-compose pull
-          docker-compose up --no-build --force-recreate --renew-anon-volumes --detach
+          docker-compose up --force-recreate --renew-anon-volumes --no-build --detach
 
           echo
           echo "Waiting for the services to startup"
-          export DOCKERIZE_VERSION=v0.6.1
+          dockerize -wait http://localhost:8080/health -wait http://localhost:16686 -timeout 2m
+
+          echo
+          echo "Testing the health of the services"
+          SERVER_OUTPUT=$(curl http://localhost:8080/health | jq -r .status)
+          if [ ! "$SERVER_OUTPUT" == "READY" ]; then
+            exit 1
+          fi
+        env:
+          VERSION: latest
+
+  test-pet-store-log-collection:
+    name: Test Pet Store Log Collection
+    runs-on: ubuntu-20.04
+    needs: build
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v2
+      - name: Setup Dockerize
+        run: |
           wget https://github.com/jwilder/dockerize/releases/download/${DOCKERIZE_VERSION}/dockerize-linux-amd64-${DOCKERIZE_VERSION}.tar.gz
           tar -C /usr/local/bin -xzvf dockerize-linux-amd64-${DOCKERIZE_VERSION}.tar.gz
           rm dockerize-linux-amd64-${DOCKERIZE_VERSION}.tar.gz
-          dockerize -wait http://localhost:8080/health -timeout 2m
+        env:
+          DOCKERIZE_VERSION: v0.6.1
+      - name: Test Service Startup
+        run: |
+          echo "Purging all docker data for the test"
+          docker logout ghcr.io
+          docker rmi -f $(docker images -a -q)
+
+          cleanup() {
+            echo
+            echo "Logs of services"
+            docker-compose -f ./log-collection/docker-compose-collector.yaml logs
+
+            echo
+            echo "Cleaning up containers of services"
+            docker-compose -f ./log-collection/docker-compose-collector.yaml down
+
+            echo
+            echo "Logs of log collection setup"
+            docker-compose -f docker-compose.yaml -f log-collection/docker-compose-pet-store-override.yaml logs
+
+            echo
+            echo "Cleaning up containers of log collection setup"
+            docker-compose -f docker-compose.yaml -f log-collection/docker-compose-pet-store-override.yaml down
+          }
+          trap cleanup EXIT
+
+          echo "Starting log collection setup"
+          docker-compose -f ./log-collection/docker-compose-collector.yaml pull
+          docker-compose -f ./log-collection/docker-compose-collector.yaml up --force-recreate --renew-anon-volumes --no-build --detach
+
+          echo
+          echo "Waiting for the log collection setup to startup"
+          dockerize -wait -wait http://localhost:5601 -timeout 2m
+
+          echo
+          echo "Starting services"
+          docker-compose -f docker-compose.yaml -f log-collection/docker-compose-pet-store-override.yaml pull
+          docker-compose -f docker-compose.yaml -f log-collection/docker-compose-pet-store-override.yaml up --force-recreate --renew-anon-volumes --no-build --detach
+
+          echo
+          echo "Waiting for the services to startup"
+          dockerize -wait http://localhost:8080/health -wait http://localhost:16686 -timeout 2m
 
           echo
           echo "Testing the health of the services"

@@ -20,14 +20,18 @@ A sample Pet Store application.
 ## Starting Up Pet Store with Log Collection
 
 1. Clone and navigate to the root of this repository.
-2. Startup the docker compose setup.
+2. Startup the log collection docker compose setup and wait for it to complete startup.
    ```bash
-   docker-compose pull
+   docker-compose -f ./log-collection/docker-compose-collector.yaml pull
    docker-compose -f ./log-collection/docker-compose-collector.yaml up --force-recreate --renew-anon-volumes
-   docker-compose -f docker-compose.yaml -f log-collection/docker-compose-pet-store-override.yaml up --build --force-recreate --renew-anon-volumes
    ```
-3. Go to http://localhost:8080/docs to view the OAS spec for the API and invoke using the available UI.
-4. Go to http://localhost:5601 to view the Kibana dashboard.
+3. Startup the pet-store with log publishing enabled.
+   ```bash
+   docker-compose -f docker-compose.yaml -f log-collection/docker-compose-pet-store-override.yaml pull
+   docker-compose -f docker-compose.yaml -f log-collection/docker-compose-pet-store-override.yaml up --force-recreate --renew-anon-volumes
+   ```
+4. Go to http://localhost:8080/docs to view the OAS spec for the API and invoke using the available UI.
+5. Go to http://localhost:5601 to view the Kibana dashboard.
 
 ## Cleaning Up
 

@@ -113,7 +113,7 @@ services:
     image: otel/opentelemetry-collector:0.38.0
     command: ["otelcol", "--config", "/etc/otel-collector/otel-config.yaml"]
     ports:
-    - "4317:4317"
+    - "4317"
     depends_on:
     - jaeger
     volumes:
