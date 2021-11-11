@@ -41,18 +41,18 @@ services:
       driver: gelf
       options:
         gelf-address: "udp://localhost:12201"
-        tag: basebase
+        tag: database
 
   otel-collector:
     logging:
       driver: gelf
       options:
         gelf-address: "udp://localhost:12201"
-        tag: basebase
+        tag: otel-collector
 
   jaeger:
     logging:
       driver: gelf
       options:
         gelf-address: "udp://localhost:12201"
-        tag: basebase
+        tag: jaeger
