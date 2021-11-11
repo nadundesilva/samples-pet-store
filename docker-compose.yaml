@@ -102,7 +102,7 @@ services:
     ports:
     - "3306"
     volumes:
-    - ${PWD}/db_schema.sql:/docker-entrypoint-initdb.d/db_schema.sql
+    - ./db_schema.sql:/docker-entrypoint-initdb.d/db_schema.sql
     environment:
     - MYSQL_ROOT_PASSWORD=pet-store-root
     - MYSQL_USER=pet-store-user
@@ -117,7 +117,7 @@ services:
     depends_on:
     - jaeger
     volumes:
-    - "${PWD}/otel-config.yaml:/etc/otel-collector/otel-config.yaml"
+    - ./otel-config.yaml:/etc/otel-collector/otel-config.yaml
 
   jaeger:
     image: jaegertracing/all-in-one:1.28

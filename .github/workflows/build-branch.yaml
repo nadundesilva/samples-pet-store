@@ -159,7 +159,7 @@ jobs:
 
           echo
           echo "Waiting for the log collection setup to startup"
-          dockerize -wait -wait http://localhost:5601 -timeout 2m
+          dockerize -wait http://localhost:5601 -timeout 2m
 
           echo
           echo "Starting services"
