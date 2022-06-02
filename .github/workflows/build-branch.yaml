@@ -3,8 +3,8 @@ name: Build Branch
 on: [push, pull_request]
 
 jobs:
-  codeql-analyze:
-    name: CodeQL Analyze
+  run-codeql-analysis:
+    name: Run CodeQL Analysis
     runs-on: ubuntu-latest
     permissions:
       actions: read
@@ -24,8 +24,8 @@ jobs:
       - name: Perform CodeQL Analysis
         uses: github/codeql-action/analyze@v2
 
-  ossar-analyze:
-    name: OSSAR Analyze
+  run-ossar-analysis:
+    name: Run OSSAR Analysis
     runs-on: windows-latest
     steps:
       - name: Checkout repository
@@ -62,8 +62,8 @@ jobs:
     runs-on: ubuntu-20.04
     needs:
       - build-base
-      - codeql-analyze
-      - ossar-analyze
+      - run-codeql-analysis
+      - run-ossar-analysis
     steps:
       - name: Checkout Code
         uses: actions/checkout@v3
@@ -76,14 +76,6 @@ jobs:
         uses: psf/black@stable
         with:
           args: ". --check"
-      - name: Run Tests
-        run: |
-          python3 -m pip install --upgrade coverage
-          coverage run --branch --source=./src/ setup.py test
-      - name: Upload Coverage Report
-        uses: codecov/codecov-action@v3
-        with:
-          fail_ci_if_error: true
       - name: Login to the Container registry
         uses: docker/login-action@v2
         with:

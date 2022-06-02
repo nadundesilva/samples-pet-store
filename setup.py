@@ -18,8 +18,8 @@ import setuptools
 with open("README.md", "r", encoding="utf-8") as fh:
     long_description = fh.read()
 
-OTEL_VERSION = "1.6.2"
-OTEL_AUTO_INST_VERSION = "0.25b2"
+OTEL_VERSION = "1.11.0"
+OTEL_AUTO_INST_VERSION = "0.30b1"
 
 setuptools.setup(
     name="pet-store-sample",
@@ -43,10 +43,10 @@ setuptools.setup(
     python_requires=">=3.6",
     setup_requires=["pytest-runner"],
     install_requires=[
-        "fastapi ~= 0.70.0",
-        "SQLAlchemy ~= 1.4.26",
+        "fastapi ~= 0.78.0",
+        "SQLAlchemy ~= 1.4.37",
         "PyMySQL ~= 1.0.2",
-        "cryptography ~= 35.0.0",
+        "cryptography ~= 37.0.2",
         "httpx ~= 0.23.0",
         "python-json-logger ~= 2.0.2",
         "opentelemetry-api ~= " + OTEL_VERSION,
@@ -58,9 +58,9 @@ setuptools.setup(
         "opentelemetry-propagator-b3 ~= " + OTEL_VERSION,
         "opentelemetry-exporter-otlp-proto-grpc ~= " + OTEL_VERSION,
     ],
-    tests_require=["pytest ~= 6.2.3", "coverage ~= 5.5"],
+    tests_require=["pytest ~= 7.1.2", "coverage ~= 6.4.1"],
     extras_require={
-        "dev": ["black ~= 20.8b1"],
-        "prod": ["uvicorn==0.15.0", "gunicorn ~= 20.1.0"],
+        "dev": ["black ~= 22.3.0"],
+        "prod": ["uvicorn==0.17.6", "gunicorn ~= 20.1.0"],
     },
 )
