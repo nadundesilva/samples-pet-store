@@ -1,4 +1,4 @@
-FROM ghcr.io/nadundesilva/samples/pet-store/builder-base:latest as builder
+FROM nadunrds/samples-pet-store-builder-base:latest as builder
 
 WORKDIR /app
 
@@ -6,7 +6,7 @@ COPY . /app
 
 RUN python3 -m build
 
-FROM ghcr.io/nadundesilva/samples/pet-store/runtime-base:latest
+FROM nadunrds/samples-pet-store-runtime-base:latest
 
 WORKDIR /app
 

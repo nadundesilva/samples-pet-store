@@ -6,31 +6,26 @@ jobs:
   build-base:
     name: Build Base
     runs-on: ubuntu-20.04
-    permissions:
-      packages: write
     steps:
       - name: Checkout Code
         uses: actions/checkout@v2
-      - name: Log in to the Container registry
+      - name: Login to the Container registry
         uses: docker/login-action@v1
         with:
-          registry: ghcr.io
-          username: ${{ github.actor }}
-          password: ${{ secrets.GITHUB_TOKEN }}
+            username: nadunrds
+            password: ${{ secrets.DOCKER_HUB_TOKEN }}
       - name: Build & Push Docker Image
         run: |
-          docker build -t ghcr.io/nadundesilva/samples/pet-store/runtime-base:latest -f docker/runtime_base/Dockerfile .
-          docker push ghcr.io/nadundesilva/samples/pet-store/runtime-base:latest
+          docker build -t nadunrds/samples-pet-store-runtime-base:latest -f docker/runtime_base/Dockerfile .
+          docker push nadunrds/samples-pet-store-runtime-base:latest
 
-          docker build -t ghcr.io/nadundesilva/samples/pet-store/builder-base:latest -f docker/builder_base/Dockerfile .
-          docker push ghcr.io/nadundesilva/samples/pet-store/builder-base:latest
+          docker build -t nadunrds/samples-pet-store-builder-base:latest -f docker/builder_base/Dockerfile .
+          docker push nadunrds/samples-pet-store-builder-base:latest
 
   build:
     name: Build Sample
     runs-on: ubuntu-20.04
     needs: build-base
-    permissions:
-      packages: write
     steps:
       - name: Checkout Code
         uses: actions/checkout@v2
@@ -54,9 +49,8 @@ jobs:
       - name: Login to the Container registry
         uses: docker/login-action@v1
         with:
-          registry: ghcr.io
-          username: ${{ github.actor }}
-          password: ${{ secrets.GITHUB_TOKEN }}
+            username: nadunrds
+            password: ${{ secrets.DOCKER_HUB_TOKEN }}
       - name: Build & Push Docker Image
         run: |
           sudo apt install docker-compose
